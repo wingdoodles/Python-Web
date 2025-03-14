@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Tools - PyITToolbox</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .footer {
+            margin-top: 50px;
+            padding: 20px 0;
+            background-color: #343a40;
+            color: white;
+        }
+        .tool-output {
+            background-color: #212529;
+            color: #fff;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .diff-add {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .diff-remove {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-tools"></i> PyITToolbox
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="bi bi-house"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/network"><i class="bi bi-globe"></i> Network</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/system"><i class="bi bi-cpu"></i> System</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/security"><i class="bi bi-shield-lock"></i> Security</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/text"><i class="bi bi-file-text"></i> Text</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/web"><i class="bi bi-browser-chrome"></i> Web</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/file"><i class="bi bi-file-earmark"></i> File</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row mb-4">
+            <div class="col">
+                <h1><i class="bi bi-file-earmark"></i> File Tools</h1>
+                <p class="lead">File comparison, search, and analysis utilities</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- File Comparison Tool -->
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5><i class="bi bi-file-diff"></i> File Comparison Tool</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="fileCompareForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="file1" class="form-label">First File</label>
+                                        <input class="form-control" type="file" id="file1">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="content1" class="form-label">Or paste content</label>
+                                        <textarea class="form-control" id="content1" rows="8" placeholder="Paste first file content here"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="file2" class="form-label">Second File</label>
+                                        <input class="form-control" type="file" id="file2">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="content2" class="form-label">Or paste content</label>
+                                        <textarea class="form-control" id="content2" rows="8" placeholder="Paste second file content here"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="diffType" id="diffInline" value="inline" checked>
+                                    <label class="form-check-label" for="diffInline">
+                                        Inline diff
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="diffType" id="diffSideBySide" value="side-by-side">
+                                    <label class="form-check-label" for="diffSideBySide">
+                                        Side-by-side diff
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-warning">Compare Files</button>
+                        </form>
+                        
+                        <div class="loader" id="fileCompareLoader"></div>
+                        
+                        <div id="fileCompareOutput" style="display: none;" class="mt-4">
+                            <h6>Comparison Results</h6>
+                            <div class="tool-output" id="compareResult"></div>
+                            <div class="mt-2">
+                                <button class="btn btn-outline-warning" id="copyCompareResult">
+                                    <i class="bi bi-clipboard"></i> Copy Results
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Hash Calculator -->
+            <div class="col-md-6 mt-4">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5><i class="bi bi-hash"></i> File Hash Calculator</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="fileHashForm">
+                            <div class="mb-3">
+                                <label for="fileHash" class="form-label">Select File</label>
+                                <input class="form-control" type="file" id="fileHash">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Hash Algorithms</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="md5Hash" checked>
+                                    <label class="form-check-label" for="md5Hash">MD5</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="sha1Hash" checked>
+                                    <label class="form-check-label" for="sha1Hash">SHA-1</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="sha256Hash" checked>
+                                    <label class="form-check-label" for="sha256Hash">SHA-256</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="sha512Hash">
+                                    <label class="form-check-label" for="sha512Hash">SHA-512</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-warning">Calculate Hash</button>
+                        </form>
+                        
+                        <div class="loader" id="fileHashLoader"></div>
+                        
+                        <div id="fileHashOutput" style="display: none;" class="mt-4">
+                            <h6>Hash Results</h6>
+                            <div id="hashResults">
+                                <table class="table table-bordered table-sm">
+                                    <tbody id="hashTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="mt-2">
+                                <button class="btn btn-outline-warning" id="copyHashResults">
+                                    <i class="bi bi-clipboard"></i> Copy Results
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Text File Analyzer -->
+            <div class="col-md-6 mt-4">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5><i class="bi bi-file-text"></i> Text File Analyzer</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="fileAnalyzerForm">
+                            <div class="mb-3">
+                                <label for="fileAnalyze" class="form-label">Select Text File</label>
+                                <input class="form-control" type="file" id="fileAnalyze">
+                            </div>
+                            <div class="mb-3">
+                                <label for="contentAnalyze" class="form-label">Or paste content</label>
+                                <textarea class="form-control" id="contentAnalyze" rows="8" placeholder="Paste text content here"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="countLines" checked>
+                                    <label class="form-check-label" for="countLines">Count Lines</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="countWords" checked>
+                                    <label class="form-check-label" for="countWords">Count Words</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="countChars" checked>
+                                    <label class="form-check-label" for="countChars">Count Characters</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="findPatterns">
+                                    <label class="form-check-label" for="findPatterns">Find Common Patterns</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-warning">Analyze File</button>
+                        </form>
+                        
+                        <div class="loader" id="fileAnalyzerLoader"></div>
+                        
+                        <div id="fileAnalyzerOutput" style="display: none;" class="mt-4">
+                            <h6>Analysis Results</h6>
+                            <div class="tool-output" id="analyzerResult"></div>
+                            <div class="mt-2">
+                                <button class="btn btn-outline-warning" id="copyAnalyzerResult">
+                                    <i class="bi bi-clipboard"></i> Copy Results
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Search in Files -->
+            <div class="col-md-12 mt-4">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5><i class="bi bi-search"></i> Search in Files</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="fileSearchForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="searchDir" class="form-label">Directory Path (leave blank to use server's working directory)</label>
+                                        <input type="text" class="form-control" id="searchDir" placeholder="/path/to/search">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="searchPattern" class="form-label">Search Pattern</label>
+                                        <input type="text" class="form-control" id="searchPattern" placeholder="Regular expression or text to search for" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="filePattern" class="form-label">File Pattern</label>
+                                        <input type="text" class="form-control" id="filePattern" placeholder="*.txt, *.log, etc." value="*.*">
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="caseInsensitive" checked>
+                                            <label class="form-check-label" for="caseInsensitive">Case Insensitive</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="recursiveSearch" checked>
+                                            <label class="form-check-label" for="recursiveSearch">Recursive Search</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="useRegex">
+                                            <label class="form-check-label" for="useRegex">Use Regular Expression</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="maxDepth" class="form-label">Maximum Search Depth (for recursive search)</label>
+                                <input type="number" class="form-control" id="maxDepth" min="1" value="10">
+                            </div>
+                            <button type="submit" class="btn btn-warning">Search in Files</button>
+                        </form>
+                        
+                        <div class="loader" id="fileSearchLoader"></div>
+                        
+                        <div id="fileSearchOutput" style="display: none;" class="mt-4">
+                            <h6>Search Results</h6>
+                            <div class="tool-output" id="searchResult"></div>
+                            <div class="mt-2">
+                                <button class="btn btn-outline-warning" id="copySearchResult">
+                                    <i class="bi bi-clipboard"></i> Copy Results
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container text-center">
+            <p>PyITToolbox - File Tools</p>
+            <p><small>© 2023 - Made with <i class="bi bi-heart-fill text-danger"></i> for IT Professionals</small></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // File Comparison Tool
+        document.getElementById('fileCompareForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get files or content
+            const file1 = document.getElementById('file1').files[0];
+            const file2 = document.getElementById('file2').files[0];
+            const content1 = document.getElementById('content1').value;
+            const content2 = document.getElementById('content2').value;
+            
+            // Check if we have files or content to compare
+            if ((!file1 && !content1) || (!file2 && !content2)) {
+                alert('Please provide two files or text content to compare');
+                return;
+            }
+            
+            const diffType = document.querySelector('input[name="diffType"]:checked').value;
+            
+            // Show loader, hide output
+            document.getElementById('fileCompareOutput').style.display = 'none';
+            document.getElementById('fileCompareLoader').style.display = 'block';
+            
+            // Prepare form data
+            const formData = new FormData();
+            if (file1) formData.append('file1', file1);
+            if (file2) formData.append('file2', file2);
+            if (content1) formData.append('content1', content1);
+            if (content2) formData.append('content2', content2);
+            formData.append('diff_type', diffType);
+            
+            fetch('/api/compare_files', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('fileCompareLoader').style.display = 'none';
+                document.getElementById('fileCompareOutput').style.display = 'block';
+                
+                if (data.error) {
+                    document.getElementById('compareResult').textContent = data.error;
+                    return;
+                }
+                
+                // Format and display diff result
+                document.getElementById('compareResult').innerHTML = data.diff_html;
+            })
+            .catch(error => {
+                document.getElementById('fileCompareLoader').style.display = 'none';
+                alert('Error: ' + error);
+            });
+        });
+        
+        // Copy compare results
+        document.getElementById('copyCompareResult').addEventListener('click', function() {
+            const result = document.getElementById('compareResult').textContent;
+            navigator.clipboard.writeText(result)
+                .then(() => {
+                    this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="bi bi-clipboard"></i> Copy Results';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy text: ', err);
+                });
+        });
+        
+        // File Hash Calculator
+        document.getElementById('fileHashForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const file = document.getElementById('fileHash').files[0];
+            
+            if (!file) {
+                alert('Please select a file to calculate hash');
+                return;
+            }
+            
+            const md5 = document.getElementById('md5Hash').checked;
+            const sha1 = document.getElementById('sha1Hash').checked;
+            const sha256 = document.getElementById('sha256Hash').checked;
+            const sha512 = document.getElementById('sha512Hash').checked;
+            
+            if (!md5 && !sha1 && !sha256 && !sha512) {
+                alert('Please select at least one hash algorithm');
+                return;
+            }
+            
+            document.getElementById('fileHashOutput').style.display = 'none';
+            document.getElementById('fileHashLoader').style.display = 'block';
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('md5', md5);
+            formData.append('sha1', sha1);
+            formData.append('sha256', sha256);
+            formData.append('sha512', sha512);
+            
+            fetch('/api/calculate_file_hash', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('fileHashLoader').style.display = 'none';
+                document.getElementById('fileHashOutput').style.display = 'block';
+                
+                if (data.error) {
+                    document.getElementById('hashTableBody').innerHTML = `<tr><td colspan="2">${data.error}</td></tr>`;
+                    return;
+                }
+                
+                // Display hash results
+                const tableBody = document.getElementById('hashTableBody');
+                tableBody.innerHTML = '';
+                
+                for (const [algorithm, hash] of Object.entries(data.hashes)) {
+                    const row = document.createElement('tr');
+                    
+                    const algoCell = document.createElement('td');
+                    algoCell.textContent = algorithm.toUpperCase();
+                    
+                    const hashCell = document.createElement('td');
+                    hashCell.textContent = hash;
+                    hashCell.style.fontFamily = 'monospace';
+                    hashCell.style.wordBreak = 'break-all';
+                    
+                    row.appendChild(algoCell);
+                    row.appendChild(hashCell);
+                    tableBody.appendChild(row);
+                }
+            })
+            .catch(error => {
+                document.getElementById('fileHashLoader').style.display = 'none';
+                alert('Error: ' + error);
+            });
+        });
+        
+        // Copy hash results
+        document.getElementById('copyHashResults').addEventListener('click', function() {
+            const tableBody = document.getElementById('hashTableBody');
+            const rows = tableBody.querySelectorAll('tr');
+            
+            let resultText = '';
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length === 2) {
+                    resultText += `${cells[0].textContent}: ${cells[1].textContent}\n`;
+                }
+            });
+            
+            navigator.clipboard.writeText(resultText)
+                .then(() => {
+                    this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="bi bi-clipboard"></i> Copy Results';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy text: ', err);
+                });
+        });
+        
+        // Text File Analyzer
+        document.getElementById('fileAnalyzerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const file = document.getElementById('fileAnalyze').files[0];
+            const content = document.getElementById('contentAnalyze').value;
+            
+            if (!file && !content) {
+                alert('Please provide a file or text content to analyze');
+                return;
+            }
+            
+            const countLines = document.getElementById('countLines').checked;
+            const countWords = document.getElementById('countWords').checked;
+            const countChars = document.getElementById('countChars').checked;
+            const findPatterns = document.getElementById('findPatterns').checked;
+            
+            if (!countLines && !countWords && !countChars && !findPatterns) {
+                alert('Please select at least one analysis option');
+                return;
+            }
+            
+            document.getElementById('fileAnalyzerOutput').style.display = 'none';
+            document.getElementById('fileAnalyzerLoader').style.display = 'block';
+            
+            const formData = new FormData();
+            if (file) formData.append('file', file);
+            if (content) formData.append('content', content);
+            formData.append('count_lines', countLines);
+            formData.append('count_words', countWords);
+            formData.append('count_chars', countChars);
+            formData.append('find_patterns', findPatterns);
+            
+            fetch('/api/analyze_text_file', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('fileAnalyzerLoader').style.display = 'none';
+                document.getElementById('fileAnalyzerOutput').style.display = 'block';
+                
+                if (data.error) {
+                    document.getElementById('analyzerResult').textContent = data.error;
+                    return;
+                }
+                
+                // Format and display analysis results
+                let result = '';
+                
+                if (data.line_count !== undefined) {
+                    result += `Total Lines: ${data.line_count}\n`;
+                }
+                
+                if (data.word_count !== undefined) {
+                    result += `Total Words: ${data.word_count}\n`;
+                }
+                
+                if (data.char_count !== undefined) {
+                    result += `Total Characters: ${data.char_count}\n`;
+                    result += `Characters (excluding whitespace): ${data.char_count_no_spaces}\n`;
+                }
+                
+                if (data.patterns && data.patterns.length > 0) {
+                    result += '\nCommon Patterns:\n';
+                    data.patterns.forEach((pattern, index) => {
+                        result += `${index + 1}. "${pattern.pattern}" (appears ${pattern.count} times)\n`;
+                    });
+                }
+                
+                document.getElementById('analyzerResult').textContent = result;
+            })
+            .catch(error => {
+                document.getElementById('fileAnalyzerLoader').style.display = 'none';
+                alert('Error: ' + error);
+            });
+        });
+        
+        // Copy analyzer results
+        document.getElementById('copyAnalyzerResult').addEventListener('click', function() {
+            const result = document.getElementById('analyzerResult').textContent;
+            navigator.clipboard.writeText(result)
+                .then(() => {
+                    this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="bi bi-clipboard"></i> Copy Results';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy text: ', err);
+                });
+        });
+        
+        // Search in Files
+        document.getElementById('fileSearchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const searchDir = document.getElementById('searchDir').value;
+            const searchPattern = document.getElementById('searchPattern').value;
+            const filePattern = document.getElementById('filePattern').value;
+            const caseInsensitive = document.getElementById('caseInsensitive').checked;
+            const recursiveSearch = document.getElementById('recursiveSearch').checked;
+            const useRegex = document.getElementById('useRegex').checked;
+            const maxDepth = document.getElementById('maxDepth').value;
+            
+            if (!searchPattern) {
+                alert('Please enter a search pattern');
+                return;
+            }
+            
+            document.getElementById('fileSearchOutput').style.display = 'none';
+            document.getElementById('fileSearchLoader').style.display = 'block';
+            
+            fetch('/api/search_in_files', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    search_dir: searchDir,
+                    search_pattern: searchPattern,
+                    file_pattern: filePattern,
+                    case_insensitive: caseInsensitive,
+                    recursive: recursiveSearch,
+                    use_regex: useRegex,
+                    max_depth: maxDepth
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('fileSearchLoader').style.display = 'none';
+                document.getElementById('fileSearchOutput').style.display = 'block';
+                
+                if (data.error) {
+                    document.getElementById('searchResult').textContent = data.error;
+                    return;
+                }
+                
+                // Format and display search results
+                let result = `Found ${data.total_matches} matches in ${data.files_with_matches} files (searched ${data.files_searched} files total)\n\n`;
+                
+                if (data.matches.length > 0) {
+                    data.matches.forEach(match => {
+                        result += `File: ${match.file}\n`;
+                        
+                        match.occurrences.forEach(occurrence => {
+                            result += `  Line ${occurrence.line_number}: ${occurrence.line}\n`;
+                        });
+                        
+                        result += '\n';
+                    });
+                } else {
+                    result += 'No matches found.';
+                }
+                
+                document.getElementById('searchResult').textContent = result;
+            })
+            .catch(error => {
+                document.getElementById('fileSearchLoader').style.display = 'none';
+                alert('Error: ' + error);
+            });
+        });
+        
+        // Copy search results
+        document.getElementById('copySearchResult').addEventListener('click', function() {
+            const result = document.getElementById('searchResult').textContent;
+            navigator.clipboard.writeText(result)
+                .then(() => {
+                    this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="bi bi-clipboard"></i> Copy Results';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy text: ', err);
+                });
+        });
+        
+        // Handle file inputs to populate the content textarea
+        document.getElementById('file1').addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('content1').value = e.target.result;
+                };
+                reader.readAsText(this.files[0]);
+            }
+        });
+        
+        document.getElementById('file2').addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('content2').value = e.target.result;
+                };
+                reader.readAsText(this.files[0]);
+            }
+        });
+        
+        document.getElementById('fileAnalyze').addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('contentAnalyze').value = e.target.result;
+                };
+                reader.readAsText(this.files[0]);
+            }
+        });
+    </script>
+</body>
+</html>
+

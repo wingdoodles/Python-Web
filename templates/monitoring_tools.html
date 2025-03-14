@@ -1,0 +1,2015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring Tools - PyITToolbox</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <link href="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.css" rel="stylesheet">
+    
+    <style>
+        .refresh-btn {
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        
+        .card-header {
+            background-color: #f8f9fa;
+        }
+        
+        .nav-tabs .nav-link.active {
+            font-weight: bold;
+        }
+        
+        .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .system-metric {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .progress-thin {
+            height: 8px;
+        }
+        
+        .log-entry {
+            border-left: 4px solid #dee2e6;
+            padding-left: 10px;
+            margin-bottom: 8px;
+        }
+        
+        .log-entry.error {
+            border-left-color: #dc3545;
+        }
+        
+        .log-entry.warning {
+            border-left-color: #ffc107;
+        }
+        
+        .log-timestamp {
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        
+        #queryResult {
+            max-height: 500px;
+            overflow: auto;
+        }
+        
+        /* Custom colors for charts */
+        :root {
+            --cpu-color: #4285F4;
+            --memory-color: #0F9D58;
+            --disk-color: #F4B400;
+            --network-color: #DB4437;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+            <i class="bi bi-tools"></i> PyITToolbox
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/"><i class="bi bi-house"></i> Home</a>
+                </li>
+                <!-- Dropdown for Tools -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-tools"></i> All Tools
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/network"><i class="bi bi-globe"></i> Network Tools</a></li>
+                        <li><a class="dropdown-item" href="/system"><i class="bi bi-cpu"></i> System Tools</a></li>
+                        <li><a class="dropdown-item" href="/security"><i class="bi bi-shield-lock"></i> Security Tools</a></li>
+                        <li><a class="dropdown-item" href="/text"><i class="bi bi-file-text"></i> Text Tools</a></li>
+                        <li><a class="dropdown-item" href="/web"><i class="bi bi-browser-chrome"></i> Web Tools</a></li>
+                        <li><a class="dropdown-item" href="/file"><i class="bi bi-file-earmark"></i> File Tools</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/database"><i class="bi bi-database"></i> Database Tools</a></li>
+                        <li><a class="dropdown-item" href="/logs"><i class="bi bi-journal-text"></i> Log Analysis</a></li>
+                        <li><a class="dropdown-item" href="/convert"><i class="bi bi-arrow-left-right"></i> Conversion Tools</a></li>
+                        <li><a class="dropdown-item active" href="/monitor"><i class="bi bi-graph-up"></i> Monitoring</a></li>
+                        <li><a class="dropdown-item" href="/monitor2"><i class="bi bi-code-square"></i> Monitoring 2</a></li>
+                        <li><a class="dropdown-item" href="/dev"><i class="bi bi-code-square"></i> Development</a></li>
+                        <li><a class="dropdown-item" href="/infrastructure"><i class="bi bi-hdd-rack"></i> Infrastructure</a></li>
+                        <li><a class="dropdown-item" href="/backup"><i class="bi bi-cloud-arrow-up"></i> Backup & Recovery</a></li>
+                        <li><a class="dropdown-item" href="/collab"><i class="bi bi-people"></i> Collaboration</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+    </nav>
+    <div class="container-fluid">
+        <h1 class="mt-4 mb-4">Monitoring Tools - PyITToolbox</h1>
+        
+        <div class="row mb-4">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs" id="monitoringTabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="system-tab" data-toggle="tab" href="#system" role="tab">System</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="database-tab" data-toggle="tab" href="#database" role="tab">Database</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="application-tab" data-toggle="tab" href="#application" role="tab">Application</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="logs-tab" data-toggle="tab" href="#logs" role="tab">Logs</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="network-tab" data-toggle="tab" href="#network" role="tab">Network</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="monitoringTabContent">
+                            <!-- System Monitoring Tab -->
+                            <div class="tab-pane fade show active" id="system" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card mb-4">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">System Information</h5>
+                                                <button class="btn btn-sm btn-outline-primary refresh-btn" data-target="systemInfo">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            </div>
+                                            <div class="card-body" id="systemInfo">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="sr-only">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card mb-4">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">CPU Usage</h5>
+                                                <button class="btn btn-sm btn-outline-primary refresh-btn" data-target="cpuInfo">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            </div>
+                                            <div class="card-body" id="cpuInfo">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="sr-only">Loading...</span>
+                                                    </div>
+                                                </div>
+                                                <canvas id="cpuChart" height="150"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card mb-4">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Memory Usage</h5>
+                                                <button class="btn btn-sm btn-outline-primary refresh-btn" data-target="memoryInfo">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            </div>
+                                            <div class="card-body" id="memoryInfo">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="sr-only">Loading...</span>
+                                                    </div>
+                                                </div>
+                                                <canvas id="memoryChart" height="150"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card mb-4">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Disk Usage</h5>
+                                                <button class="btn btn-sm btn-outline-primary refresh-btn" data-target="diskInfo">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            </div>
+                                            <div class="card-body" id="diskInfo">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="sr-only">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card mb-4">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Process Information</h5>
+                                                <button class="btn btn-sm btn-outline-primary refresh-btn" data-target="processInfo">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            </div>
+                                            <div class="card-body" id="processInfo">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="sr-only">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Database Monitoring Tab -->
+                            <div class="tab-pane fade" id="database" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card mb-4">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Database Information</h5>
+                                                <button class="btn btn-sm btn-outline-primary refresh-btn" data-target="dbInfo">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            </div>
+                                            <div class="card-body" id="dbInfo">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="sr-only">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card mb-4">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Database Statistics</h5>
+                                                <button class="btn btn-sm btn-outline-primary refresh-btn" data-target="dbStats">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            </div>
+                                            <div class="card-body" id="dbStats">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="sr-only">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card mb-4">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Tables</h5>
+                                                <button class="btn btn-sm btn-outline-primary refresh-btn" data-target="tableInfo">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            </div>
+                                            <div class="card-body" id="tableInfo">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="sr-only">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card mb-4">
+                                            <div class="card-header">
+                                                <h5 class="mb-0">Query Execution</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="form-group">
+                                                    <label for="sqlQuery">SQL Query:</label>
+                                                    <textarea class="form-control" id="sqlQuery" rows="3" placeholder="SELECT * FROM users LIMIT 10"></textarea>
+                                                </div>
+                                                <div class="form-check mb-3">
+                                                    <input class="form-check-input" type="checkbox" id="explainQuery">
+                                                    <label class="form-check-label" for="explainQuery">
+                                                        Explain Query Plan
+                                                    </label>
+                                                </div>
+                                                <button id="executeQuery" class="btn btn-primary">Execute</button>
+                                                <hr>
+                                                <div id="queryResult">
+                                                    <!-- Query results will be displayed here -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Application Monitoring Tab -->
+                            <div class="tab-pane fade" id="application" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card mb-4">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Application Information</h5>
+                                                <button class="btn btn-sm btn-outline-primary refresh-btn" data-target="appInfo">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            </div>
+                                            <div class="card-body" id="appInfo">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="sr-only">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card mb-4">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Active Users</h5>
+                                                <button class="btn btn-sm btn-outline-primary refresh-btn" data-target="activeUsers">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            </div>
+                                            <div class="card-body" id="activeUsers">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="sr-only">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card mb-4">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Recent Requests</h5>
+                                                <button class="btn btn-sm btn-outline-primary refresh-btn" data-target="recentRequests">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            </div>
+                                            <div class="card-body" id="recentRequests">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="sr-only">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card mb-4">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Routes</h5>
+                                                <button class="btn btn-sm btn-outline-primary refresh-btn" data-target="routesInfo">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            </div>
+                                            <div class="card-body" id="routesInfo">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="sr-only">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Logs Tab -->
+                            <div class="tab-pane fade" id="logs" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card mb-4">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Error Logs</h5>
+                                                <div>
+                                                    <select id="logLevel" class="form-control form-control-sm d-inline-block" style="width: auto;">
+                                                        <option value="all">All Levels</option>
+                                                        <option value="error">Errors Only</option>
+                                                        <option value="warning">Warnings & Errors</option>
+                                                    </select>
+                                                    <button class="btn btn-sm btn-outline-primary refresh-btn ml-2" data-target="errorLogs">
+                                                        <i class="fas fa-sync-alt"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="card-body" id="errorLogs">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="sr-only">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card mb-4">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Access Logs</h5>
+                                                <button class="btn btn-sm btn-outline-primary refresh-btn" data-target="accessLogs">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            </div>
+                                            <div class="card-body" id="accessLogs">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="sr-only">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card mb-4">
+                                            <div class="card-header">
+                                                <h5 class="mb-0">Log File Viewer</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="form-group">
+                                                    <label for="logFile">Select Log File:</label>
+                                                    <select class="form-control" id="logFile">
+                                                        <option value="app.log">app.log</option>
+                                                        <option value="error.log">error.log</option>
+                                                        <option value="access.log">access.log</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="logLines">Number of Lines:</label>
+                                                    <input type="number" class="form-control" id="logLines" value="100" min="10" max="1000">
+                                                </div>
+                                                <button id="viewLog" class="btn btn-primary">View Log</button>
+                                                <hr>
+                                                <div id="logContent" class="bg-dark text-light p-3" style="height: 400px; overflow: auto; font-family: monospace;">
+                                                    <!-- Log content will be displayed here -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Network Tab -->
+                            <div class="tab-pane fade" id="network" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card mb-4">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Network Interfaces</h5>
+                                                <button class="btn btn-sm btn-outline-primary refresh-btn" data-target="networkInterfaces">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            </div>
+                                            <div class="card-body" id="networkInterfaces">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="sr-only">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card mb-4">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Network Traffic</h5>
+                                                <button class="btn btn-sm btn-outline-primary refresh-btn" data-target="networkTraffic">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            </div>
+                                            <div class="card-body" id="networkTraffic">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="sr-only">Loading...</span>
+                                                    </div>
+                                                </div>
+                                                <canvas id="networkChart" height="150"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card mb-4">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Active Connections</h5>
+                                                <button class="btn btn-sm btn-outline-primary refresh-btn" data-target="activeConnections">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                            </div>
+                                            <div class="card-body" id="activeConnections">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="sr-only">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card mb-4">
+                                            <div class="card-header">
+                                                <h5 class="mb-0">Ping Tool</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="form-group">
+                                                    <label for="pingHost">Host to ping:</label>
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control" id="pingHost" placeholder="example.com or 192.168.1.1">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-primary" id="pingButton">Ping</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="pingResult" class="mt-3">
+                                                    <!-- Ping results will be displayed here -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+    
+    <!-- Monitoring Dashboard Script -->
+    <script>
+        // Initialize charts
+        let cpuChart = null;
+        let memoryChart = null;
+        let networkChart = null;
+        
+        // Store historical data for charts
+        const cpuData = {
+            labels: [],
+            datasets: [{
+                label: 'CPU Usage %',
+                backgroundColor: 'rgba(66, 133, 244, 0.2)',
+                borderColor: 'rgba(66, 133, 244, 1)',
+                borderWidth: 1,
+                data: []
+            }]
+        };
+        
+        const memoryData = {
+            labels: [],
+            datasets: [{
+                label: 'Memory Usage %',
+                backgroundColor: 'rgba(15, 157, 88, 0.2)',
+                borderColor: 'rgba(15, 157, 88, 1)',
+                borderWidth: 1,
+                data: []
+            }]
+        };
+        
+        const networkData = {
+            labels: [],
+            datasets: [
+                {
+                    label: 'Received',
+                    backgroundColor: 'rgba(66, 133, 244, 0.2)',
+                    borderColor: 'rgba(66, 133, 244, 1)',
+                    borderWidth: 1,
+                    data: []
+                },
+                {
+                    label: 'Sent',
+                    backgroundColor: 'rgba(219, 68, 55, 0.2)',
+                    borderColor: 'rgba(219, 68, 55, 1)',
+                    borderWidth: 1,
+                    data: []
+                }
+            ]
+        };
+        
+        // Configuration for all charts
+        const chartConfig = {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                duration: 0 // general animation time
+            },
+            hover: {
+                animationDuration: 0 // duration of animations when hovering an item
+            },
+            responsiveAnimationDuration: 0, // animation duration after a resize
+            scales: {
+                xAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Time'
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    },
+                    scaleLabel: {
+                        display: true,
+                        labelString: '%'
+                    }
+                }]
+            }
+        };
+        
+        // Initialize charts when DOM is ready
+        $(document).ready(function() {
+            initCharts();
+            
+            // Set up refresh buttons
+            $('.refresh-btn').click(function() {
+                const target = $(this).data('target');
+                refreshData(target);
+            });
+            
+            // Set up execute query button
+            $('#executeQuery').click(function() {
+                executeQuery();
+            });
+            
+            // Set up view log button
+            $('#viewLog').click(function() {
+                viewLog();
+            });
+            
+            // Set up ping button
+            $('#pingButton').click(function() {
+                pingHost();
+            });
+            
+            // Initial data load for visible tab
+            refreshData('systemInfo');
+            refreshData('cpuInfo');
+            refreshData('memoryInfo');
+            refreshData('diskInfo');
+            refreshData('processInfo');
+            
+                        // Load data when switching tabs
+                        $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+                const target = $(e.target).attr("href");
+                
+                // Load appropriate data based on active tab
+                if (target === '#system') {
+                    refreshData('systemInfo');
+                    refreshData('cpuInfo');
+                    refreshData('memoryInfo');
+                    refreshData('diskInfo');
+                    refreshData('processInfo');
+                } else if (target === '#database') {
+                    refreshData('dbInfo');
+                    refreshData('dbStats');
+                    refreshData('tableInfo');
+                } else if (target === '#application') {
+                    refreshData('appInfo');
+                    refreshData('activeUsers');
+                    refreshData('recentRequests');
+                    refreshData('routesInfo');
+                } else if (target === '#logs') {
+                    refreshData('errorLogs');
+                    refreshData('accessLogs');
+                } else if (target === '#network') {
+                    refreshData('networkInterfaces');
+                    refreshData('networkTraffic');
+                    refreshData('activeConnections');
+                }
+            });
+            
+            // Set up periodic refresh for charts (every 5 seconds)
+            setInterval(function() {
+                if ($('#system-tab').hasClass('active')) {
+                    refreshData('cpuInfo');
+                    refreshData('memoryInfo');
+                }
+                
+                if ($('#network-tab').hasClass('active')) {
+                    refreshData('networkTraffic');
+                }
+            }, 5000);
+        });
+        
+        // Initialize charts
+        function initCharts() {
+            // CPU Chart
+            const cpuCtx = document.getElementById('cpuChart').getContext('2d');
+            cpuChart = new Chart(cpuCtx, {
+                type: 'line',
+                data: cpuData,
+                options: chartConfig
+            });
+            
+            // Memory Chart
+            const memoryCtx = document.getElementById('memoryChart').getContext('2d');
+            memoryChart = new Chart(memoryCtx, {
+                type: 'line',
+                data: memoryData,
+                options: chartConfig
+            });
+            
+            // Network Chart
+            const networkCtx = document.getElementById('networkChart').getContext('2d');
+            networkChart = new Chart(networkCtx, {
+                type: 'line',
+                data: networkData,
+                options: chartConfig
+            });
+        }
+        
+        // Refresh data function
+        function refreshData(target) {
+            // Show loading spinner
+            $(`#${target}`).html('<div class="d-flex justify-content-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>');
+            
+            // API endpoints for each data type
+            const endpoints = {
+                'systemInfo': '/api/monitoring/system/info',
+                'cpuInfo': '/api/monitoring/system/cpu',
+                'memoryInfo': '/api/monitoring/system/memory',
+                'diskInfo': '/api/monitoring/system/disk',
+                'processInfo': '/api/monitoring/system/processes',
+                'dbInfo': '/api/monitoring/database/info',
+                'dbStats': '/api/monitoring/database/stats',
+                'tableInfo': '/api/monitoring/database/tables',
+                'appInfo': '/api/monitoring/application/info',
+                'activeUsers': '/api/monitoring/application/users',
+                'recentRequests': '/api/monitoring/application/requests',
+                'routesInfo': '/api/monitoring/application/routes',
+                'errorLogs': '/api/monitoring/logs/error',
+                'accessLogs': '/api/monitoring/logs/access',
+                'networkInterfaces': '/api/monitoring/network/interfaces',
+                'networkTraffic': '/api/monitoring/network/traffic',
+                'activeConnections': '/api/monitoring/network/connections'
+            };
+            
+            // Make API request
+            $.ajax({
+                url: endpoints[target],
+                method: 'GET',
+                success: function(data) {
+                    // Update UI based on data type
+                    switch(target) {
+                        case 'systemInfo':
+                            renderSystemInfo(data);
+                            break;
+                        case 'cpuInfo':
+                            renderCpuInfo(data);
+                            break;
+                        case 'memoryInfo':
+                            renderMemoryInfo(data);
+                            break;
+                        case 'diskInfo':
+                            renderDiskInfo(data);
+                            break;
+                        case 'processInfo':
+                            renderProcessInfo(data);
+                            break;
+                        case 'dbInfo':
+                            renderDatabaseInfo(data);
+                            break;
+                        case 'dbStats':
+                            renderDatabaseStats(data);
+                            break;
+                        case 'tableInfo':
+                            renderTableInfo(data);
+                            break;
+                        case 'appInfo':
+                            renderAppInfo(data);
+                            break;
+                        case 'activeUsers':
+                            renderActiveUsers(data);
+                            break;
+                        case 'recentRequests':
+                            renderRecentRequests(data);
+                            break;
+                        case 'routesInfo':
+                            renderRoutesInfo(data);
+                            break;
+                        case 'errorLogs':
+                            renderErrorLogs(data);
+                            break;
+                        case 'accessLogs':
+                            renderAccessLogs(data);
+                            break;
+                        case 'networkInterfaces':
+                            renderNetworkInterfaces(data);
+                            break;
+                        case 'networkTraffic':
+                            renderNetworkTraffic(data);
+                            break;
+                        case 'activeConnections':
+                            renderActiveConnections(data);
+                            break;
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $(`#${target}`).html(`<div class="alert alert-danger">
+                        <strong>Error:</strong> ${error}<br>
+                        <small>${xhr.responseText || 'No response from server'}</small>
+                    </div>`);
+                }
+            });
+        }
+        
+        // Render functions for each data type
+        function renderSystemInfo(data) {
+            let html = `
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <th>Operating System:</th>
+                                <td>${data.system} ${data.release}</td>
+                            </tr>
+                            <tr>
+                                <th>Hostname:</th>
+                                <td>${data.node}</td>
+                            </tr>
+                            <tr>
+                                <th>Platform:</th>
+                                <td>${data.machine} (${data.processor})</td>
+                            </tr>
+                            <tr>
+                                <th>Python Version:</th>
+                                <td>${data.python_version}</td>
+                            </tr>
+                            <tr>
+                                <th>Boot Time:</th>
+                                <td>${data.boot_time}</td>
+                            </tr>
+                            <tr>
+                                <th>Uptime:</th>
+                                <td>${data.uptime_formatted}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            $('#systemInfo').html(html);
+        }
+        
+        function renderCpuInfo(data) {
+            // Add data to chart
+            const now = new Date().toLocaleTimeString();
+            
+            // Limit data points (keep last 30)
+            if (cpuData.labels.length > 30) {
+                cpuData.labels.shift();
+                cpuData.datasets[0].data.shift();
+            }
+            
+            cpuData.labels.push(now);
+            cpuData.datasets[0].data.push(data.usage_percent);
+            
+            if (cpuChart) {
+                cpuChart.update();
+            }
+            
+            // Render CPU details
+            let html = `
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="text-center">
+                            <div class="system-metric">${data.usage_percent.toFixed(1)}%</div>
+                            <div class="metric-label">CPU Usage</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="progress progress-thin mt-3">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: ${data.usage_percent}%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <th>Physical Cores:</th>
+                                <td>${data.physical_cores}</td>
+                            </tr>
+                            <tr>
+                                <th>Logical Cores:</th>
+                                <td>${data.total_cores}</td>
+                            </tr>
+                            <tr>
+                                <th>Current Frequency:</th>
+                                <td>${data.current_frequency} MHz</td>
+                            </tr>
+                            <tr>
+                                <th>Min/Max Frequency:</th>
+                                <td>${data.min_frequency} / ${data.max_frequency} MHz</td>
+                            </tr>
+                            <tr>
+                                <th>Load Average:</th>
+                                <td>${Array.isArray(data.load_avg) ? data.load_avg.map(n => n.toFixed(2)).join(' / ') : 'N/A'}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            $('#cpuInfo').html(html);
+        }
+        
+        function renderMemoryInfo(data) {
+            // Add data to chart
+            const now = new Date().toLocaleTimeString();
+            
+            // Limit data points (keep last 30)
+            if (memoryData.labels.length > 30) {
+                memoryData.labels.shift();
+                memoryData.datasets[0].data.shift();
+            }
+            
+            memoryData.labels.push(now);
+            memoryData.datasets[0].data.push(data.virtual.percent);
+            
+            if (memoryChart) {
+                memoryChart.update();
+            }
+            
+            // Render memory details
+            let html = `
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="text-center">
+                            <div class="system-metric">${data.virtual.percent.toFixed(1)}%</div>
+                            <div class="metric-label">Memory Usage</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="progress progress-thin mt-3">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: ${data.virtual.percent}%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Total</th>
+                                <th>Used</th>
+                                <th>Available</th>
+                                <th>Percent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th>Virtual Memory</th>
+                                <td>${data.virtual.formatted.total}</td>
+                                <td>${data.virtual.formatted.used}</td>
+                                <td>${data.virtual.formatted.available}</td>
+                                <td>${data.virtual.percent.toFixed(1)}%</td>
+                            </tr>
+                            <tr>
+                                <th>Swap</th>
+                                <td>${data.swap.formatted.total}</td>
+                                <td>${data.swap.formatted.used}</td>
+                                <td>${data.swap.formatted.free}</td>
+                                <td>${data.swap.percent.toFixed(1)}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            $('#memoryInfo').html(html);
+        }
+        
+        function renderDiskInfo(data) {
+            if (data.error) {
+                $('#diskInfo').html(`<div class="alert alert-danger">${data.error}</div>`);
+                return;
+            }
+            
+            let html = '<div class="table-responsive"><table class="table table-sm">';
+            html += `
+                <thead>
+                    <tr>
+                        <th>Mount Point</th>
+                        <th>Total</th>
+                        <th>Used</th>
+                        <th>Free</th>
+                        <th>Percent</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+            
+            for (const partition of data.partitions) {
+                html += `
+                    <tr>
+                        <td>${partition.mountpoint}</td>
+                        <td>${partition.formatted.total}</td>
+                        <td>${partition.formatted.used}</td>
+                        <td>${partition.formatted.free}</td>
+                        <td>
+                            <div class="progress" style="height: 5px;">
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: ${partition.percent}%"></div>
+                            </div>
+                            ${partition.percent}%
+                        </td>
+                        <td>${partition.fstype}</td>
+                    </tr>
+                `;
+            }
+            
+            html += '</tbody></table></div>';
+            
+            if (data.io_stats) {
+                html += `
+                    <div class="mt-4">
+                        <h6>I/O Statistics</h6>
+                        <div class="row">
+                            <div class="col-md-3 text-center">
+                                <div class="system-metric">${data.io_stats.read_count}</div>
+                                <div class="metric-label">Read Count</div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="system-metric">${data.io_stats.write_count}</div>
+                                <div class="metric-label">Write Count</div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="system-metric">${data.io_stats.formatted.read_bytes}</div>
+                                <div class="metric-label">Read</div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="system-metric">${data.io_stats.formatted.write_bytes}</div>
+                                <div class="metric-label">Written</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            $('#diskInfo').html(html);
+        }
+        
+        function renderProcessInfo(data) {
+            if (data.error) {
+                $('#processInfo').html(`<div class="alert alert-danger">${data.error}</div>`);
+                return;
+            }
+            
+            let html = `
+                <div class="row mb-3">
+                    <div class="col-md-4 text-center">
+                        <div class="system-metric">${data.total_processes}</div>
+                        <div class="metric-label">Total Processes</div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="system-metric">${data.running_processes}</div>
+                        <div class="metric-label">Running</div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="system-metric">${data.sleeping_processes}</div>
+                        <div class="metric-label">Sleeping</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <input type="text" class="form-control" id="processSearch" placeholder="Search processes...">
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>PID</th>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>CPU %</th>
+                                <th>Memory %</th>
+                                <th>Memory</th>
+                                <th>Threads</th>
+                                <th>Started</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            for (const process of data.processes) {
+                html += `
+                    <tr>
+                        <td>${process.pid}</td>
+                        <td>${process.name}</td>
+                        <td>${process.status}</td>
+                        <td>${process.cpu_percent.toFixed(1)}%</td>
+                        <td>${process.memory_percent.toFixed(1)}%</td>
+                        <td>${process.formatted.memory_info}</td>
+                        <td>${process.num_threads}</td>
+                        <td>${process.create_time}</td>
+                    </tr>
+                `;
+            }
+            
+            html += '</tbody></table></div>';
+            
+            $('#processInfo').html(html);
+            
+            // Add process search functionality
+            $('#processSearch').on('keyup', function() {
+                const value = $(this).val().toLowerCase();
+                $('#processInfo table tbody tr').filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        }
+        
+        function renderDatabaseInfo(data) {
+            if (data.error) {
+                $('#dbInfo').html(`<div class="alert alert-danger">${data.error}</div>`);
+                return;
+            }
+            
+            let html = `
+                <div class="row mb-3">
+                    <div class="col-md-4 text-center">
+                        <div class="system-metric">${data.formatted.size}</div>
+                        <div class="metric-label">Database Size</div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="system-metric">${data.table_count}</div>
+                        <div class="metric-label">Tables</div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="system-metric">${data.index_count}</div>
+                        <div class="metric-label">Indexes</div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <th>Database File:</th>
+                                <td>${data.db_file}</td>
+                            </tr>
+                            <tr>
+                                <th>SQLite Version:</th>
+                                <td>${data.sqlite_version}</td>
+                            </tr>
+                            <tr>
+                                <th>Last Modified:</th>
+                                <td>${data.last_modified}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            $('#dbInfo').html(html);
+        }
+        
+        function renderDatabaseStats(data) {
+            if (data.error) {
+                $('#dbStats').html(`<div class="alert alert-danger">${data.error}</div>`);
+                return;
+            }
+            
+            let html = `
+                <div class="row mb-3">
+                    <div class="col-md-6 text-center">
+                        <div class="system-metric">${data.integrity}</div>
+                        <div class="metric-label">Integrity Check</div>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <div class="system-metric">${data.formatted.page_size}</div>
+                        <div class="metric-label">Page Size</div>
+                    </div>
+                </div>
+                
+                <h6 class="mt-4">Database Statistics</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Table</th>
+                                <th>Index</th>
+                                <th>Statistic</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            for (const stat of data.stats) {
+                html += `
+                    <tr>
+                        <td>${stat.table}</td>
+                        <td>${stat.idx}</td>
+                        <td>${stat.stat}</td>
+                        <td>${stat.value}</td>
+                    </tr>
+                `;
+            }
+            
+            html += '</tbody></table></div>';
+            
+            $('#dbStats').html(html);
+        }
+        
+        function renderTableInfo(data) {
+            if (data.error) {
+                $('#tableInfo').html(`<div class="alert alert-danger">${data.error}</div>`);
+                return;
+            }
+            
+            let html = `
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Table Name</th>
+                                <th>Rows</th>
+                                <th>Size</th>
+                                <th>Columns</th>
+                                <th>Indexes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            for (const table of data) {
+                html += `
+                    <tr data-toggle="collapse" data-target="#table-${table.name}" class="clickable">
+                        <td>${table.name}</td>
+                        <td>${table.row_count}</td>
+                        <td>${table.formatted_size}</td>
+                        <td>${table.columns.length}</td>
+                        <td>${table.indexes}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" class="p-0">
+                            <div id="table-${table.name}" class="collapse">
+                                <div class="p-3 bg-light">
+                                    <h6>Columns</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm mb-3">
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Type</th>
+                                                    <th>Not Null</th>
+                                                    <th>Default</th>
+                                                    <th>Primary Key</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                `;
+                
+                for (const column of table.columns) {
+                    html += `
+                        <tr>
+                            <td>${column.name}</td>
+                            <td>${column.type || 'N/A'}</td>
+                            <td>${column.notnull ? 'Yes' : 'No'}</td>
+                            <td>${column.dflt_value || 'N/A'}</td>
+                            <td>${column.pk ? 'Yes' : 'No'}</td>
+                        </tr>
+                    `;
+                }
+                
+                html += `
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <button class="btn btn-sm btn-outline-primary sample-data" data-table="${table.name}">
+                                        View Sample Data
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            html += '</tbody></table></div>';
+            
+            $('#tableInfo').html(html);
+            
+            // Set up sample data buttons
+            $('.sample-data').click(function(e) {
+                e.stopPropagation();
+                const tableName = $(this).data('table');
+                const query = `SELECT * FROM ${tableName} LIMIT 10`;
+                $('#sqlQuery').val(query);
+                $('#executeQuery').click();
+                $('#database-tab').tab('show');
+            });
+        }
+        
+        function executeQuery() {
+            const query = $('#sqlQuery').val().trim();
+            const explain = $('#explainQuery').is(':checked');
+            
+            if (!query) {
+                $('#queryResult').html('<div class="alert alert-warning">Please enter a SQL query</div>');
+                return;
+            }
+            
+            $('#queryResult').html('<div class="d-flex justify-content-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>');
+            
+            $.ajax({
+                url: '/api/monitoring/database/query',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    query: query,
+                    explain: explain
+                }),
+                success: function(data) {
+                    if (data.error) {
+                        $('#queryResult').html(`<div class="alert alert-danger">${data.error}</div>`);
+                        return;
+                    }
+                    
+                    let html = `
+                        <div class="alert alert-info">
+                            <strong>Query executed in ${data.execution_time_ms}ms</strong>
+                            <br>
+                            <small>${data.row_count} rows returned</small>
+                        </div>
+                    `;
+                    
+                    if (data.query_plan && data.query_plan.length > 0) {
+                        html += `
+                            <h6>Query Plan</h6>
+                            <div class="bg-light p-3 mb-3">
+                                <pre class="mb-0"><code>${data.query_plan.map(p => `${p.id}${' '.repeat(4)}${p.parent ? p.parent + ' ' : ''}${p.detail}`).join('\n')}</code></pre>
+                            </div>
+                        `;
+                    }
+                    
+                    if (data.results && data.results.length > 0) {
+                        // Get column names from first result
+                        const columns = Object.keys(data.results[0]);
+                        
+                        html += `
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            ${columns.map(col => `<th>${col}</th>`).join('')}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                        `;
+                        
+                        for (const row of data.results) {
+                            html += '<tr>';
+                            for (const col of columns) {
+                                html += `<td>${row[col] !== null ? row[col] : '<em>NULL</em>'}</td>`;
+                            }
+                            html += '</tr>';
+                        }
+                        
+                        html += '</tbody></table></div>';
+                        
+                        if (data.truncated) {
+                            html += '<div class="alert alert-warning mt-3">Results truncated. Displaying first 1000 rows.</div>';
+                        }
+                    } else {
+                        html += '<div class="alert alert-success">Query executed successfully. No results returned.</div>';
+                    }
+                    
+                    $('#queryResult').html(html);
+                },
+                error: function(xhr, status, error) {
+                    $('#queryResult').html(`<div class="alert alert-danger">
+                        <strong>Error:</strong> ${error}<br>
+                        <small>${xhr.responseText || 'No response from server'}</small>
+                    </div>`);
+                }
+            });
+        }
+        
+        function renderAppInfo(data) {
+            if (data.error) {
+                $('#appInfo').html(`<div class="alert alert-danger">${data.error}</div>`);
+                return;
+            }
+            
+            let html = `
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <th>App Name:</th>
+                                <td>${data.name}</td>
+                            </tr>
+                            <tr>
+                                <th>Debug Mode:</th>
+                                <td>${data.debug ? '<span class="badge badge-warning">Enabled</span>' : '<span class="badge badge-success">Disabled</span>'}</td>
+                            </tr>
+                            <tr>
+                                <th>Testing Mode:</th>
+                                <td>${data.testing ? '<span class="badge badge-warning">Enabled</span>' : '<span class="badge badge-success">Disabled</span>'}</td>
+                            </tr>
+                            <tr>
+                                <th>Static Folder:</th>
+                                <td>${data.static_folder}</td>
+                            </tr>
+                            <tr>
+                                <th>Template Folder:</th>
+                                <td>${data.template_folder}</td>
+                            </tr>
+                            <tr>
+                                <th>Instance Path:</th>
+                                <td>${data.instance_path}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            $('#appInfo').html(html);
+        }
+        
+        function renderActiveUsers(data) {
+            if (data.error) {
+                $('#activeUsers').html(`<div class="alert alert-danger">${data.error}</div>`);
+                return;
+            }
+            
+            let html = `
+                <div class="text-center mb-3">
+                    <div class="system-metric">${data.count}</div>
+                    <div class="metric-label">Active Users (last ${data.time_window})</div>
+                </div>
+            `;
+            
+            if (data.active_users && data.active_users.length > 0) {
+                html += `
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Last Activity</th>
+                                    <th>Last Page</th>
+                                    <th>IP Address</th>
+                                                                        <th>User</th>
+                                    <th>Last Activity</th>
+                                    <th>Last Page</th>
+                                    <th>IP Address</th>
+                                    <th>User Agent</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                for (const user of data.active_users) {
+                    html += `
+                        <tr>
+                            <td>${user.username || '<em>Anonymous</em>'}</td>
+                            <td>${user.last_active}</td>
+                            <td>${user.last_page}</td>
+                            <td>${user.ip_address}</td>
+                            <td>${user.browser} / ${user.platform}</td>
+                        </tr>
+                    `;
+                }
+                
+                html += '</tbody></table></div>';
+            } else {
+                html += '<div class="alert alert-info">No active users found.</div>';
+            }
+            
+            $('#activeUsers').html(html);
+        }
+        
+        function renderRecentRequests(data) {
+            if (data.error) {
+                $('#recentRequests').html(`<div class="alert alert-danger">${data.error}</div>`);
+                return;
+            }
+            
+            let html = `
+                <div class="row mb-3">
+                    <div class="col-md-3 text-center">
+                        <div class="system-metric">${data.total_requests}</div>
+                        <div class="metric-label">Total Requests</div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="system-metric">${data.requests_per_second.toFixed(2)}/s</div>
+                        <div class="metric-label">Requests Rate</div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="system-metric">${data.average_time.toFixed(2)}ms</div>
+                        <div class="metric-label">Avg Response Time</div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="system-metric">${data.error_rate.toFixed(2)}%</div>
+                        <div class="metric-label">Error Rate</div>
+                    </div>
+                </div>
+            `;
+            
+            if (data.requests && data.requests.length > 0) {
+                html += `
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Method</th>
+                                    <th>Path</th>
+                                    <th>Status</th>
+                                    <th>Response Time</th>
+                                    <th>IP Address</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                for (const req of data.requests) {
+                    const statusClass = req.status < 400 ? 'text-success' : 'text-danger';
+                    
+                    html += `
+                        <tr>
+                            <td>${req.timestamp}</td>
+                            <td>${req.method}</td>
+                            <td>${req.path}</td>
+                            <td class="${statusClass}">${req.status}</td>
+                            <td>${req.response_time.toFixed(2)}ms</td>
+                            <td>${req.ip_address}</td>
+                        </tr>
+                    `;
+                }
+                
+                html += '</tbody></table></div>';
+            } else {
+                html += '<div class="alert alert-info">No recent requests found.</div>';
+            }
+            
+            $('#recentRequests').html(html);
+        }
+        
+        function renderRoutesInfo(data) {
+            if (data.error) {
+                $('#routesInfo').html(`<div class="alert alert-danger">${data.error}</div>`);
+                return;
+            }
+            
+            let html = `
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Endpoint</th>
+                                <th>Methods</th>
+                                <th>Path</th>
+                                <th>Handler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            for (const route of data.routes) {
+                html += `
+                    <tr>
+                        <td>${route.endpoint}</td>
+                        <td>${route.methods.map(m => `<span class="badge badge-info">${m}</span>`).join(' ')}</td>
+                        <td>${route.path}</td>
+                        <td>${route.handler}</td>
+                    </tr>
+                `;
+            }
+            
+            html += '</tbody></table></div>';
+            
+            $('#routesInfo').html(html);
+        }
+        
+        function renderErrorLogs(data) {
+            if (data.error) {
+                $('#errorLogs').html(`<div class="alert alert-danger">${data.error}</div>`);
+                return;
+            }
+            
+            const level = $('#logLevel').val();
+            
+            let filteredLogs = data.logs;
+            if (level === 'error') {
+                filteredLogs = data.logs.filter(log => log.level === 'ERROR');
+            } else if (level === 'warning') {
+                filteredLogs = data.logs.filter(log => log.level === 'ERROR' || log.level === 'WARNING');
+            }
+            
+            let html = '';
+            
+            if (filteredLogs.length === 0) {
+                html = '<div class="alert alert-info">No error logs found with the selected filter.</div>';
+            } else {
+                for (const log of filteredLogs) {
+                    const logClass = log.level === 'ERROR' ? 'error' : log.level === 'WARNING' ? 'warning' : '';
+                    
+                    html += `
+                        <div class="log-entry ${logClass}">
+                            <div class="log-timestamp">${log.timestamp}</div>
+                            <div>
+                                <strong>${log.level}</strong>: ${log.message}
+                            </div>
+                            ${log.traceback ? `<pre class="bg-dark text-light p-2 mt-2 small"><code>${log.traceback}</code></pre>` : ''}
+                        </div>
+                    `;
+                }
+            }
+            
+            $('#errorLogs').html(html);
+        }
+        
+        function renderAccessLogs(data) {
+            if (data.error) {
+                $('#accessLogs').html(`<div class="alert alert-danger">${data.error}</div>`);
+                return;
+            }
+            
+            let html = `
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>IP</th>
+                                <th>Method</th>
+                                <th>Path</th>
+                                <th>Status</th>
+                                <th>User Agent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            for (const log of data.logs) {
+                const statusClass = log.status < 400 ? '' : 'text-danger';
+                
+                html += `
+                    <tr>
+                        <td>${log.timestamp}</td>
+                        <td>${log.ip}</td>
+                        <td>${log.method}</td>
+                        <td>${log.path}</td>
+                        <td class="${statusClass}">${log.status}</td>
+                        <td>${log.user_agent}</td>
+                    </tr>
+                `;
+            }
+            
+            html += '</tbody></table></div>';
+            
+            $('#accessLogs').html(html);
+        }
+        
+        function viewLog() {
+            const logFile = $('#logFile').val();
+            const lines = $('#logLines').val();
+            
+            $('#logContent').html('<div class="text-center"><div class="spinner-border text-light" role="status"><span class="sr-only">Loading...</span></div></div>');
+            
+            $.ajax({
+                url: `/api/monitoring/logs/view?file=${logFile}&lines=${lines}`,
+                method: 'GET',
+                success: function(data) {
+                    if (data.error) {
+                        $('#logContent').html(`<div class="text-danger">${data.error}</div>`);
+                        return;
+                    }
+                    
+                    let html = '';
+                    for (const line of data.content) {
+                        // Add different colors for different log levels
+                        let lineClass = '';
+                        if (line.includes(' ERROR ')) {
+                            lineClass = 'text-danger';
+                        } else if (line.includes(' WARNING ')) {
+                            lineClass = 'text-warning';
+                        } else if (line.includes(' INFO ')) {
+                            lineClass = 'text-info';
+                        } else if (line.includes(' DEBUG ')) {
+                            lineClass = 'text-muted';
+                        }
+                        
+                        html += `<div class="${lineClass}">${line}</div>`;
+                    }
+                    
+                    $('#logContent').html(html);
+                    // Scroll to bottom of log content
+                    $('#logContent').scrollTop($('#logContent')[0].scrollHeight);
+                },
+                error: function(xhr, status, error) {
+                    $('#logContent').html(`<div class="text-danger">
+                        <strong>Error:</strong> ${error}<br>
+                        <small>${xhr.responseText || 'No response from server'}</small>
+                    </div>`);
+                }
+            });
+        }
+        
+        function renderNetworkInterfaces(data) {
+            if (data.error) {
+                $('#networkInterfaces').html(`<div class="alert alert-danger">${data.error}</div>`);
+                return;
+            }
+            
+            let html = `
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Interface</th>
+                                <th>IP Address</th>
+                                <th>MAC Address</th>
+                                <th>Netmask</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            for (const [name, iface] of Object.entries(data)) {
+                for (const addr of iface.addrs) {
+                    html += `
+                        <tr>
+                            <td>${name}</td>
+                            <td>${addr.address || 'N/A'}</td>
+                            <td>${iface.mac || 'N/A'}</td>
+                            <td>${addr.netmask || 'N/A'}</td>
+                            <td>${iface.isup ? '<span class="badge badge-success">Up</span>' : '<span class="badge badge-danger">Down</span>'}</td>
+                        </tr>
+                    `;
+                }
+            }
+            
+            html += '</tbody></table></div>';
+            
+            $('#networkInterfaces').html(html);
+        }
+        
+        function renderNetworkTraffic(data) {
+            if (data.error) {
+                $('#networkTraffic').html(`<div class="alert alert-danger">${data.error}</div>`);
+                return;
+            }
+            
+            // Add data to chart
+            const now = new Date().toLocaleTimeString();
+            
+            // Limit data points (keep last 30)
+            if (networkData.labels.length > 30) {
+                networkData.labels.shift();
+                networkData.datasets[0].data.shift();
+                networkData.datasets[1].data.shift();
+            }
+            
+            networkData.labels.push(now);
+            networkData.datasets[0].data.push(data.bytes_recv / 1024);  // Convert to KB
+            networkData.datasets[1].data.push(data.bytes_sent / 1024);  // Convert to KB
+            
+            if (networkChart) {
+                networkChart.update();
+            }
+            
+            let html = `
+                <div class="row mb-4">
+                    <div class="col-md-6 text-center">
+                        <div class="system-metric">${data.formatted.bytes_recv}/s</div>
+                        <div class="metric-label">Received</div>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <div class="system-metric">${data.formatted.bytes_sent}/s</div>
+                        <div class="metric-label">Sent</div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Packets</th>
+                                <th>Errors</th>
+                                <th>Dropped</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th>Received</th>
+                                <td>${data.packets_recv}</td>
+                                <td>${data.errin}</td>
+                                <td>${data.dropin}</td>
+                            </tr>
+                            <tr>
+                                <th>Sent</th>
+                                <td>${data.packets_sent}</td>
+                                <td>${data.errout}</td>
+                                <td>${data.dropout}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            $('#networkTraffic').html(html);
+        }
+        
+        function renderActiveConnections(data) {
+            if (data.error) {
+                $('#activeConnections').html(`<div class="alert alert-danger">${data.error}</div>`);
+                return;
+            }
+            
+            let html = `
+                <div class="row mb-3">
+                    <div class="col-md-3 text-center">
+                        <div class="system-metric">${data.established}</div>
+                        <div class="metric-label">Established</div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="system-metric">${data.listen}</div>
+                        <div class="metric-label">Listening</div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="system-metric">${data.time_wait}</div>
+                        <div class="metric-label">Time Wait</div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="system-metric">${data.close_wait}</div>
+                        <div class="metric-label">Close Wait</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <input type="text" class="form-control" id="connectionSearch" placeholder="Search connections...">
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                                                <thead>
+                            <tr>
+                                <th>Protocol</th>
+                                <th>Local Address</th>
+                                <th>Remote Address</th>
+                                <th>Status</th>
+                                <th>PID</th>
+                                <th>Program</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            for (const conn of data.connections) {
+                html += `
+                    <tr>
+                        <td>${conn.type}</td>
+                        <td>${conn.laddr.ip}:${conn.laddr.port}</td>
+                        <td>${conn.raddr ? conn.raddr.ip + ':' + conn.raddr.port : 'N/A'}</td>
+                        <td>${conn.status}</td>
+                        <td>${conn.pid || 'N/A'}</td>
+                        <td>${conn.process_name || 'N/A'}</td>
+                    </tr>
+                `;
+            }
+            
+            html += '</tbody></table></div>';
+            
+            $('#activeConnections').html(html);
+            
+            // Add connection search functionality
+            $('#connectionSearch').on('keyup', function() {
+                const value = $(this).val().toLowerCase();
+                $('#activeConnections table tbody tr').filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        }
+        
+        function pingHost() {
+            const host = $('#pingHost').val().trim();
+            
+            if (!host) {
+                $('#pingResult').html('<div class="alert alert-warning">Please enter a host to ping</div>');
+                return;
+            }
+            
+            $('#pingResult').html('<div class="d-flex justify-content-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>');
+            
+            $.ajax({
+                url: `/api/monitoring/network/ping?host=${encodeURIComponent(host)}`,
+                method: 'GET',
+                success: function(data) {
+                    if (data.error) {
+                        $('#pingResult').html(`<div class="alert alert-danger">${data.error}</div>`);
+                        return;
+                    }
+                    
+                    let html = `<div class="bg-dark text-light p-3" style="font-family: monospace;">`;
+                    
+                    if (data.output) {
+                        html += data.output.replace(/\n/g, '<br>');
+                    }
+                    
+                    html += `</div>
+                    
+                    <div class="mt-3">
+                        <div class="row">
+                            <div class="col-md-3 text-center">
+                                <div class="system-metric">${data.packets_transmitted}</div>
+                                <div class="metric-label">Transmitted</div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="system-metric">${data.packets_received}</div>
+                                <div class="metric-label">Received</div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="system-metric">${data.packet_loss}%</div>
+                                <div class="metric-label">Packet Loss</div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="system-metric">${data.avg_time ? data.avg_time.toFixed(2) + 'ms' : 'N/A'}</div>
+                                <div class="metric-label">Avg Time</div>
+                            </div>
+                        </div>
+                    </div>`;
+                    
+                    $('#pingResult').html(html);
+                },
+                error: function(xhr, status, error) {
+                    $('#pingResult').html(`<div class="alert alert-danger">
+                        <strong>Error:</strong> ${error}<br>
+                        <small>${xhr.responseText || 'No response from server'}</small>
+                    </div>`);
+                }
+            });
+        }
+        
+        // Add event listener for log level filter
+        $('#logLevel').change(function() {
+            refreshData('errorLogs');
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+

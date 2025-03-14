@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Tools - PyITToolbox</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .footer {
+            margin-top: 50px;
+            padding: 20px 0;
+            background-color: #343a40;
+            color: white;
+        }
+        .tool-output {
+            background-color: #212529;
+            color: #fff;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-tools"></i> PyITToolbox
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="bi bi-house"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/network"><i class="bi bi-globe"></i> Network</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/system"><i class="bi bi-cpu"></i> System</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/security"><i class="bi bi-shield-lock"></i> Security</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/text"><i class="bi bi-file-text"></i> Text</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/web"><i class="bi bi-browser-chrome"></i> Web</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/file"><i class="bi bi-file-earmark"></i> File</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row mb-4">
+            <div class="col">
+                <h1><i class="bi bi-file-text"></i> Text Tools</h1>
+                <p class="lead">Format, encode, decode, and transform text data</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Text Encoder/Decoder -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="bi bi-code-slash"></i> Text Encoder/Decoder</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="encoderForm">
+                            <div class="mb-3">
+                                <label for="textInput" class="form-label">Input Text</label>
+                                <textarea class="form-control" id="textInput" rows="4" placeholder="Enter text to encode/decode"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="encodingType" class="form-label">Encoding/Decoding Type</label>
+                                <select class="form-select" id="encodingType">
+                                    <option value="base64_encode">Base64 Encode</option>
+                                    <option value="base64_decode">Base64 Decode</option>
+                                    <option value="url_encode">URL Encode</option>
+                                    <option value="url_decode">URL Decode</option>
+                                    <option value="html_encode">HTML Encode</option>
+                                    <option value="html_decode">HTML Decode</option>
+                                    <option value="hex_encode">Hex Encode</option>
+                                    <option value="hex_decode">Hex Decode</option>
+                                    <option value="binary_encode">Binary Encode</option>
+                                    <option value="binary_decode">Binary Decode</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-info text-white">Process</button>
+                        </form>
+                        <div class="loader" id="encoderLoader"></div>
+                        <div class="mt-3" id="encoderOutput" style="display: none;">
+                            <div class="mb-3">
+                                <label for="resultText" class="form-label">Result</label>
+                                <textarea class="form-control" id="resultText" rows="4" readonly></textarea>
+                            </div>
+                            <button class="btn btn-outline-info" id="copyEncoderResult">
+                                <i class="bi bi-clipboard"></i> Copy Result
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- JSON Formatter -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="bi bi-braces"></i> JSON Formatter</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="jsonForm">
+                            <div class="mb-3">
+                                <label for="jsonInput" class="form-label">JSON Input</label>
+                                <textarea class="form-control" id="jsonInput" rows="4" placeholder="Enter JSON to format"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="jsonIndent" class="form-label">Indentation</label>
+                                <select class="form-select" id="jsonIndent">
+                                    <option value="2">2 spaces</option>
+                                    <option value="4" selected>4 spaces</option>
+                                    <option value="tab">Tab</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-info text-white">Format JSON</button>
+                            <button type="button" id="minifyJson" class="btn btn-outline-info">Minify</button>
+                        </form>
+                        <div class="loader" id="jsonLoader"></div>
+                        <div class="mt-3" id="jsonOutput" style="display: none;">
+                            <div class="mb-3">
+                                <label for="jsonResult" class="form-label">Formatted JSON</label>
+                                <textarea class="form-control" id="jsonResult" rows="4" readonly></textarea>
+                            </div>
+                            <button class="btn btn-outline-info" id="copyJsonResult">
+                                <i class="bi bi-clipboard"></i> Copy Result
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Case Converter -->
+            <div class="col-md-6 mt-4">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="bi bi-type"></i> Case Converter</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="caseForm">
+                            <div class="mb-3">
+                                <label for="caseInput" class="form-label">Input Text</label>
+                                <textarea class="form-control" id="caseInput" rows="4" placeholder="Enter text to convert case"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <div class="btn-group w-100" role="group">
+                                    <button type="button" class="btn btn-outline-info" id="upperCase">UPPERCASE</button>
+                                    <button type="button" class="btn btn-outline-info" id="lowerCase">lowercase</button>
+                                    <button type="button" class="btn btn-outline-info" id="titleCase">Title Case</button>
+                                    <button type="button" class="btn btn-outline-info" id="sentenceCase">Sentence case</button>
+                                    <button type="button" class="btn btn-outline-info" id="camelCase">camelCase</button>
+                                    <button type="button" class="btn btn-outline-info" id="snakeCase">snake_case</button>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="loader" id="caseLoader"></div>
+                        <div class="mt-3" id="caseOutput" style="display: none;">
+                            <div class="mb-3">
+                                <label for="caseResult" class="form-label">Result</label>
+                                <textarea class="form-control" id="caseResult" rows="4" readonly></textarea>
+                            </div>
+                            <button class="btn btn-outline-info" id="copyCaseResult">
+                                <i class="bi bi-clipboard"></i> Copy Result
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Regular Expression Tool -->
+            <div class="col-md-6 mt-4">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="bi bi-regex"></i> Regular Expression Tool</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="regexForm">
+                            <div class="mb-3">
+                                <label for="regexPattern" class="form-label">Regular Expression Pattern</label>
+                                <input type="text" class="form-control" id="regexPattern" placeholder="Enter regex pattern (e.g., \b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b)">
+                            </div>
+                            <div class="mb-3">
+                                <label for="regexInput" class="form-label">Text to Match</label>
+                                <textarea class="form-control" id="regexInput" rows="4" placeholder="Enter text to match against the pattern"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="regexGlobal" checked>
+                                    <label class="form-check-label" for="regexGlobal">Global (g) - Find all matches</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="regexInsensitive">
+                                    <label class="form-check-label" for="regexInsensitive">Case Insensitive (i)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="regexMultiline">
+                                    <label class="form-check-label" for="regexMultiline">Multiline (m)</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-info text-white">Test Regular Expression</button>
+                        </form>
+                        <div class="loader" id="regexLoader"></div>
+                        <div class="mt-3" id="regexOutput" style="display: none;">
+                            <h6>Matches Found: <span id="matchCount">0</span></h6>
+                            <div class="mb-3 tool-output" id="regexResult"></div>
+                            <button class="btn btn-outline-info" id="copyRegexResult">
+                                <i class="bi bi-clipboard"></i> Copy Results
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container text-center">
+            <p>PyITToolbox - Text Tools</p>
+            <p><small>© 2023 - Made with <i class="bi bi-heart-fill text-danger"></i> for IT Professionals</small></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Text Encoder/Decoder
+        document.getElementById('encoderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const text = document.getElementById('textInput').value;
+            const encodingType = document.getElementById('encodingType').value;
+            
+            if (!text) {
+                alert('Please enter text to process');
+                return;
+            }
+            
+            document.getElementById('encoderOutput').style.display = 'none';
+            document.getElementById('encoderLoader').style.display = 'block';
+            
+            fetch('/api/text_encode_decode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: text,
+                    operation: encodingType
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('encoderLoader').style.display = 'none';
+                document.getElementById('encoderOutput').style.display = 'block';
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                document.getElementById('resultText').value = data.result;
+            })
+            .catch(error => {
+                document.getElementById('encoderLoader').style.display = 'none';
+                alert('Error: ' + error);
+            });
+        });
+        
+        // Copy encoder result
+        document.getElementById('copyEncoderResult').addEventListener('click', function() {
+            const resultField = document.getElementById('resultText');
+            resultField.select();
+            document.execCommand('copy');
+            this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+            setTimeout(() => {
+                this.innerHTML = '<i class="bi bi-clipboard"></i> Copy Result';
+            }, 2000);
+        });
+        
+        // JSON Formatter
+        document.getElementById('jsonForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            formatJson(false);
+        });
+        
+        document.getElementById('minifyJson').addEventListener('click', function() {
+            formatJson(true);
+        });
+        
+        function formatJson(minify) {
+            const json = document.getElementById('jsonInput').value;
+            const indent = document.getElementById('jsonIndent').value;
+            
+            if (!json) {
+                alert('Please enter JSON to format');
+                return;
+            }
+            
+            document.getElementById('jsonOutput').style.display = 'none';
+            document.getElementById('jsonLoader').style.display = 'block';
+            
+            fetch('/api/format_json', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    json: json,
+                    indent: indent,
+                    minify: minify
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('jsonLoader').style.display = 'none';
+                document.getElementById('jsonOutput').style.display = 'block';
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                document.getElementById('jsonResult').value = data.result;
+            })
+            .catch(error => {
+                document.getElementById('jsonLoader').style.display = 'none';
+                alert('Error: ' + error);
+            });
+        }
+        
+        // Copy JSON result
+        document.getElementById('copyJsonResult').addEventListener('click', function() {
+            const resultField = document.getElementById('jsonResult');
+            resultField.select();
+            document.execCommand('copy');
+            this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+            setTimeout(() => {
+                this.innerHTML = '<i class="bi bi-clipboard"></i> Copy Result';
+            }, 2000);
+        });
+        
+        // Case Converter
+        function convertCase(type) {
+            const text = document.getElementById('caseInput').value;
+            
+            if (!text) {
+                alert('Please enter text to convert');
+                return;
+            }
+            
+            document.getElementById('caseOutput').style.display = 'none';
+            document.getElementById('caseLoader').style.display = 'block';
+            
+            fetch('/api/case_convert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: text,
+                    case_type: type
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('caseLoader').style.display = 'none';
+                document.getElementById('caseOutput').style.display = 'block';
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                document.getElementById('caseResult').value = data.result;
+            })
+            .catch(error => {
+                document.getElementById('caseLoader').style.display = 'none';
+                alert('Error: ' + error);
+            });
+        }
+        
+        document.getElementById('upperCase').addEventListener('click', function() {
+            convertCase('upper');
+        });
+        
+        document.getElementById('lowerCase').addEventListener('click', function() {
+            convertCase('lower');
+        });
+        
+        document.getElementById('titleCase').addEventListener('click', function() {
+            convertCase('title');
+        });
+        
+        document.getElementById('sentenceCase').addEventListener('click', function() {
+            convertCase('sentence');
+        });
+        
+        document.getElementById('camelCase').addEventListener('click', function() {
+            convertCase('camel');
+        });
+        
+        document.getElementById('snakeCase').addEventListener('click', function() {
+            convertCase('snake');
+        });
+        
+        // Copy case result
+        document.getElementById('copyCaseResult').addEventListener('click', function() {
+            const resultField = document.getElementById('caseResult');
+            resultField.select();
+            document.execCommand('copy');
+            this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+            setTimeout(() => {
+                this.innerHTML = '<i class="bi bi-clipboard"></i> Copy Result';
+            }, 2000);
+        });
+        
+        // Regular Expression Tool
+        document.getElementById('regexForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const pattern = document.getElementById('regexPattern').value;
+            const text = document.getElementById('regexInput').value;
+            const global = document.getElementById('regexGlobal').checked;
+            const insensitive = document.getElementById('regexInsensitive').checked;
+            const multiline = document.getElementById('regexMultiline').checked;
+            
+            if (!pattern) {
+                alert('Please enter a regular expression pattern');
+                return;
+            }
+            
+            if (!text) {
+                alert('Please enter text to match');
+                return;
+            }
+            
+            document.getElementById('regexOutput').style.display = 'none';
+            document.getElementById('regexLoader').style.display = 'block';
+            
+            fetch('/api/regex_test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    pattern: pattern,
+                    text: text,
+                    global: global,
+                    insensitive: insensitive,
+                    multiline: multiline
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('regexLoader').style.display = 'none';
+                document.getElementById('regexOutput').style.display = 'block';
+                
+                if (data.error) {
+                    document.getElementById('matchCount').textContent = '0';
+                    document.getElementById('regexResult').innerHTML = 'Error: ' + data.error;
+                    return;
+                }
+                
+                document.getElementById('matchCount').textContent = data.matches.length;
+                
+                let resultHTML = '';
+                if (data.matches.length === 0) {
+                    resultHTML = '<p>No matches found.</p>';
+                } else {
+                    resultHTML = '<ol>';
+                    data.matches.forEach(match => {
+                        resultHTML += `<li><strong>Match:</strong> ${match}</li>`;
+                    });
+                    resultHTML += '</ol>';
+                    
+                    resultHTML += '<p><strong>Highlighted Text:</strong></p>';
+                    resultHTML += `<p>${data.highlighted_text}</p>`;
+                }
+                
+                document.getElementById('regexResult').innerHTML = resultHTML;
+            })
+            .catch(error => {
+                document.getElementById('regexLoader').style.display = 'none';
+                document.getElementById('matchCount').textContent = '0';
+                document.getElementById('regexResult').innerHTML = 'Error: ' + error;
+            });
+        });
+        
+        // Copy regex result
+        document.getElementById('copyRegexResult').addEventListener('click', function() {
+            const results = document.getElementById('regexResult').innerText;
+            const tempElement = document.createElement('textarea');
+            tempElement.value = results;
+            document.body.appendChild(tempElement);
+            tempElement.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempElement);
+            
+            this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+            setTimeout(() => {
+                this.innerHTML = '<i class="bi bi-clipboard"></i> Copy Results';
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
+

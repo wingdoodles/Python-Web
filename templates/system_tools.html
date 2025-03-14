@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Tools - PyITToolbox</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .footer {
+            margin-top: 50px;
+            padding: 20px 0;
+            background-color: #343a40;
+            color: white;
+        }
+        .tool-output {
+            background-color: #212529;
+            color: #fff;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+        .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-tools"></i> PyITToolbox
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="bi bi-house"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/network"><i class="bi bi-globe"></i> Network</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/system"><i class="bi bi-cpu"></i> System</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/security"><i class="bi bi-shield-lock"></i> Security</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/text"><i class="bi bi-file-text"></i> Text</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/web"><i class="bi bi-browser-chrome"></i> Web</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/file"><i class="bi bi-file-earmark"></i> File</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row mb-4">
+            <div class="col">
+                <h1><i class="bi bi-cpu"></i> System Tools</h1>
+                <p class="lead">Monitor system resources and performance</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- System Information -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="bi bi-info-circle"></i> System Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <button id="sysInfoBtn" class="btn btn-success">Get System Info</button>
+                        <div class="loader" id="sysInfoLoader"></div>
+                        <div class="mt-3" id="sysInfoOutput" style="display: none;">
+                            <div class="mb-3">
+                                <h6>System Details</h6>
+                                <ul class="list-group">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        OS
+                                        <span id="osInfo" class="badge bg-primary rounded-pill">-</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Computer Name
+                                        <span id="computerName" class="badge bg-primary rounded-pill">-</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        OS Version
+                                        <span id="osVersion" class="badge bg-primary rounded-pill">-</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Architecture
+                                        <span id="architecture" class="badge bg-primary rounded-pill">-</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Processor
+                                        <span id="processor" class="badge bg-primary rounded-pill">-</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        CPU Cores (Physical)
+                                        <span id="cpuCount" class="badge bg-primary rounded-pill">-</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        CPU Cores (Logical)
+                                        <span id="logicalCpuCount" class="badge bg-primary rounded-pill">-</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        System Boot Time
+                                        <span id="bootTime" class="badge bg-primary rounded-pill">-</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <h6>Memory Usage</h6>
+                            <div class="progress mb-3">
+                                <div id="memoryBar" class="progress-bar bg-warning" role="progressbar" style="width: 0%;" 
+                                    aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                            </div>
+                            <div class="text-muted mb-4">
+                                <small id="memoryDetails">0 GB used of 0 GB total</small>
+                            </div>
+
+                            <h6>Disk Usage</h6>
+                            <div class="progress mb-3">
+                                <div id="diskBar" class="progress-bar bg-info" role="progressbar" style="width: 0%;" 
+                                    aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                            </div>
+                            <div class="text-muted">
+                                <small id="diskDetails">0 GB used of 0 GB total</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Process Monitor -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="bi bi-list-check"></i> Process Monitor</h5>
+                    </div>
+                    <div class="card-body">
+                        <button id="processBtn" class="btn btn-success">Get Running Processes</button>
+                        <button id="refreshProcessBtn" class="btn btn-outline-success ms-2" style="display: none;">Refresh</button>
+                        <div class="loader" id="processLoader"></div>
+                        <div class="mt-3 table-responsive" id="processOutput" style="display: none;">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>PID</th>
+                                        <th>Name</th>
+                                        <th>User</th>
+                                        <th>Memory %</th>
+                                        <th>CPU %</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="processTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Connections -->
+            <div class="col-md-12 mt-4">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="bi bi-diagram-3"></i> Network Connections</h5>
+                    </div>
+                    <div class="card-body">
+                        <button id="connectionsBtn" class="btn btn-success">Get Network Connections</button>
+                        <button id="refreshConnectionsBtn" class="btn btn-outline-success ms-2" style="display: none;">Refresh</button>
+                        <div class="loader" id="connectionsLoader"></div>
+                        <div class="mt-3 table-responsive" id="connectionsOutput" style="display: none;">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Protocol</th>
+                                        <th>Local Address</th>
+                                        <th>Remote Address</th>
+                                        <th>Status</th>
+                                        <th>PID</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="connectionsTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container text-center">
+            <p>PyITToolbox - System Tools</p>
+            <p><small>© 2023 - Made with <i class="bi bi-heart-fill text-danger"></i> for IT Professionals</small></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Format bytes to human-readable format
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + ' ' + sizes[i];
+        }
+
+        // System Information
+        document.getElementById('sysInfoBtn').addEventListener('click', function() {
+            document.getElementById('sysInfoOutput').style.display = 'none';
+            document.getElementById('sysInfoLoader').style.display = 'block';
+            
+            fetch('/api/system_info')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('sysInfoLoader').style.display = 'none';
+                document.getElementById('sysInfoOutput').style.display = 'block';
+                
+                // Fill in the system information
+                document.getElementById('osInfo').textContent = data.system;
+                document.getElementById('computerName').textContent = data.node;
+                document.getElementById('osVersion').textContent = data.version;
+                document.getElementById('architecture').textContent = data.machine;
+                document.getElementById('processor').textContent = data.processor;
+                document.getElementById('cpuCount').textContent = data.cpu_count;
+                document.getElementById('logicalCpuCount').textContent = data.logical_cpu_count;
+                document.getElementById('bootTime').textContent = data.boot_time;
+                
+                // Memory usage
+                const memoryPercent = data.memory.percent;
+                const memoryTotal = formatBytes(data.memory.total);
+                const memoryUsed = formatBytes(data.memory.total - data.memory.available);
+                
+                document.getElementById('memoryBar').style.width = memoryPercent + '%';
+                document.getElementById('memoryBar').textContent = memoryPercent + '%';
+                document.getElementById('memoryBar').setAttribute('aria-valuenow', memoryPercent);
+                document.getElementById('memoryDetails').textContent = `${memoryUsed} used of ${memoryTotal} total`;
+                
+                // Disk usage
+                const diskPercent = data.disk.percent;
+                const diskTotal = formatBytes(data.disk.total);
+                const diskUsed = formatBytes(data.disk.used);
+                
+                document.getElementById('diskBar').style.width = diskPercent + '%';
+                document.getElementById('diskBar').textContent = diskPercent + '%';
+                document.getElementById('diskBar').setAttribute('aria-valuenow', diskPercent);
+                document.getElementById('diskDetails').textContent = `${diskUsed} used of ${diskTotal} total`;
+            })
+            .catch(error => {
+                document.getElementById('sysInfoLoader').style.display = 'none';
+                alert('Error: ' + error);
+            });
+        });
+        
+        // Process Monitor
+        document.getElementById('processBtn').addEventListener('click', loadProcesses);
+        document.getElementById('refreshProcessBtn').addEventListener('click', loadProcesses);
+        
+        function loadProcesses() {
+            document.getElementById('processOutput').style.display = 'none';
+            document.getElementById('processLoader').style.display = 'block';
+            document.getElementById('refreshProcessBtn').style.display = 'none';
+            
+            fetch('/api/processes')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('processLoader').style.display = 'none';
+                document.getElementById('processOutput').style.display = 'block';
+                document.getElementById('refreshProcessBtn').style.display = 'inline-block';
+                
+                const tableBody = document.getElementById('processTableBody');
+                tableBody.innerHTML = '';
+                
+                // Sort processes by memory usage
+                data.processes.sort((a, b) => b.memory_percent - a.memory_percent);
+                
+                data.processes.forEach(process => {
+                    const row = document.createElement('tr');
+                    
+                    const pid = document.createElement('td');
+                    pid.textContent = process.pid || '-';
+                    
+                    const name = document.createElement('td');
+                    name.textContent = process.name || '-';
+                    
+                    const user = document.createElement('td');
+                    user.textContent = process.username || '-';
+                    
+                    const memory = document.createElement('td');
+                    memory.textContent = process.memory_percent ? process.memory_percent.toFixed(2) + '%' : '-';
+                    
+                    const cpu = document.createElement('td');
+                    cpu.textContent = process.cpu_percent ? process.cpu_percent.toFixed(2) + '%' : '-';
+                    
+                    row.appendChild(pid);
+                    row.appendChild(name);
+                    row.appendChild(user);
+                    row.appendChild(memory);
+                    row.appendChild(cpu);
+                    
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                document.getElementById('processLoader').style.display = 'none';
+                alert('Error: ' + error);
+            });
+        }
+        
+        // Network Connections
+        document.getElementById('connectionsBtn').addEventListener('click', loadConnections);
+        document.getElementById('refreshConnectionsBtn').addEventListener('click', loadConnections);
+        
+        function loadConnections() {
+            document.getElementById('connectionsOutput').style.display = 'none';
+            document.getElementById('connectionsLoader').style.display = 'block';
+            document.getElementById('refreshConnectionsBtn').style.display = 'none';
+            
+            fetch('/api/network_connections')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('connectionsLoader').style.display = 'none';
+                document.getElementById('connectionsOutput').style.display = 'block';
+                document.getElementById('refreshConnectionsBtn').style.display = 'inline-block';
+                
+                const tableBody = document.getElementById('connectionsTableBody');
+                tableBody.innerHTML = '';
+                
+                data.connections.forEach(conn => {
+                    const row = document.createElement('tr');
+                    
+                    const protocol = document.createElement('td');
+                    protocol.textContent = conn.type === 1 ? 'TCP' : 'UDP';
+                    
+                    const local = document.createElement('td');
+                    local.textContent = conn.local_addr || '-';
+                    
+                    const remote = document.createElement('td');
+                    remote.textContent = conn.remote_addr || '-';
+                    
+                    const status = document.createElement('td');
+                    status.textContent = conn.status || '-';
+                    
+                    const pid = document.createElement('td');
+                    pid.textContent = conn.pid || '-';
+                    
+                    row.appendChild(protocol);
+                    row.appendChild(local);
+                    row.appendChild(remote);
+                    row.appendChild(status);
+                    row.appendChild(pid);
+                    
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                document.getElementById('connectionsLoader').style.display = 'none';
+                alert('Error: ' + error);
+            });
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Tools - PyITToolbox</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .footer {
+            margin-top: 50px;
+            padding: 20px 0;
+            background-color: #343a40;
+            color: white;
+        }
+        .tool-output {
+            background-color: #212529;
+            color: #fff;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .headers-table {
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-tools"></i> PyITToolbox
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="bi bi-house"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/network"><i class="bi bi-globe"></i> Network</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/system"><i class="bi bi-cpu"></i> System</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/security"><i class="bi bi-shield-lock"></i> Security</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/text"><i class="bi bi-file-text"></i> Text</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/web"><i class="bi bi-browser-chrome"></i> Web</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/file"><i class="bi bi-file-earmark"></i> File</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row mb-4">
+            <div class="col">
+                <h1><i class="bi bi-browser-chrome"></i> Web Tools</h1>
+                <p class="lead">HTTP requests, URL parsing, and website diagnostics</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- HTTP Request Tool -->
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="bi bi-arrow-left-right"></i> HTTP Request Tool</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="httpForm">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="mb-3">
+                                        <label for="httpUrl" class="form-label">URL</label>
+                                        <input type="url" class="form-control" id="httpUrl" placeholder="https://example.com/api/endpoint" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="httpMethod" class="form-label">Method</label>
+                                        <select class="form-select" id="httpMethod">
+                                            <option value="GET">GET</option>
+                                            <option value="POST">POST</option>
+                                            <option value="PUT">PUT</option>
+                                            <option value="DELETE">DELETE</option>
+                                            <option value="HEAD">HEAD</option>
+                                            <option value="OPTIONS">OPTIONS</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <ul class="nav nav-tabs mb-3" id="httpTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="params-tab" data-bs-toggle="tab" data-bs-target="#params" type="button" role="tab">Parameters</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="headers-tab" data-bs-toggle="tab" data-bs-target="#headers" type="button" role="tab">Headers</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="body-tab" data-bs-toggle="tab" data-bs-target="#body" type="button" role="tab">Body</button>
+                                </li>
+                            </ul>
+                            
+                            <div class="tab-content" id="httpTabContent">
+                                <div class="tab-pane fade show active" id="params" role="tabpanel">
+                                    <div id="paramsContainer">
+                                        <div class="row param-row mb-2">
+                                            <div class="col-5">
+                                                <input type="text" class="form-control param-key" placeholder="Key">
+                                            </div>
+                                            <div class="col-5">
+                                                <input type="text" class="form-control param-value" placeholder="Value">
+                                            </div>
+                                            <div class="col-2">
+                                                <button type="button" class="btn btn-outline-danger remove-param">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" id="addParam">
+                                        <i class="bi bi-plus-circle"></i> Add Parameter
+                                    </button>
+                                </div>
+                                
+                                <div class="tab-pane fade" id="headers" role="tabpanel">
+                                    <div id="headersContainer">
+                                        <div class="row header-row mb-2">
+                                            <div class="col-5">
+                                                <input type="text" class="form-control header-key" placeholder="Header Name">
+                                            </div>
+                                            <div class="col-5">
+                                                <input type="text" class="form-control header-value" placeholder="Header Value">
+                                            </div>
+                                            <div class="col-2">
+                                                <button type="button" class="btn btn-outline-danger remove-header">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" id="addHeader">
+                                        <i class="bi bi-plus-circle"></i> Add Header
+                                    </button>
+                                </div>
+                                
+                                <div class="tab-pane fade" id="body" role="tabpanel">
+                                    <div class="mb-3">
+                                        <label for="contentType" class="form-label">Content Type</label>
+                                        <select class="form-select" id="contentType">
+                                            <option value="application/json">application/json</option>
+                                            <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+                                            <option value="text/plain">text/plain</option>
+                                            <option value="multipart/form-data">multipart/form-data</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="requestBody" class="form-label">Request Body</label>
+                                        <textarea class="form-control" id="requestBody" rows="5" placeholder="Enter request body"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <button type="submit" class="btn btn-primary">Send Request</button>
+                                <button type="button" class="btn btn-outline-secondary" id="clearRequest">Clear</button>
+                            </div>
+                        </form>
+                        
+                        <div class="loader" id="httpLoader"></div>
+                        
+                        <div id="httpResponse" style="display: none;" class="mt-4">
+                            <h5>Response</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Status: <span id="responseStatus" class="badge bg-success">200 OK</span></span>
+                                <span>Time: <span id="responseTime">0 ms</span></span>
+                            </div>
+                            
+                            <ul class="nav nav-tabs mb-3" id="responseTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="response-body-tab" data-bs-toggle="tab" data-bs-target="#response-body" type="button" role="tab">Body</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="response-headers-tab" data-bs-toggle="tab" data-bs-target="#response-headers" type="button" role="tab">Headers</button>
+                                </li>
+                            </ul>
+                            
+                            <div class="tab-content" id="responseTabContent">
+                                <div class="tab-pane fade show active" id="response-body" role="tabpanel">
+                                    <div class="mb-2">
+                                        <button class="btn btn-sm btn-outline-primary" id="formatResponse">Format</button>
+                                        <button class="btn btn-sm btn-outline-primary" id="copyResponse">Copy</button>
+                                    </div>
+                                    <div class="tool-output" id="responseBody"></div>
+                                </div>
+                                
+                                <div class="tab-pane fade" id="response-headers" role="tabpanel">
+                                    <table class="table table-sm table-striped headers-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Header</th>
+                                                <th>Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="responseHeaders">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- URL Parser -->
+            <div class="col-md-6 mt-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="bi bi-link-45deg"></i> URL Parser</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="urlParserForm">
+                            <div class="mb-3">
+                                <label for="urlToParse" class="form-label">URL to Parse</label>
+                                <input type="url" class="form-control" id="urlToParse" placeholder="https://example.com/path?param=value" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Parse URL</button>
+                        </form>
+                        
+                        <div class="loader" id="urlParserLoader"></div>
+                        
+                        <div id="urlParserOutput" style="display: none;" class="mt-4">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th>Protocol</th>
+                                        <td id="urlProtocol"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Domain</th>
+                                        <td id="urlDomain"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Port</th>
+                                        <td id="urlPort"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Path</th>
+                                        <td id="urlPath"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Query Parameters</th>
+                                        <td id="urlParams"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Fragment</th>
+                                        <td id="urlFragment"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SSL Certificate Checker -->
+            <div class="col-md-6 mt-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="bi bi-shield-check"></i> SSL Certificate Checker</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="sslForm">
+                            <div class="mb-3">
+                                <label for="sslDomain" class="form-label">Domain</label>
+                                <input type="text" class="form-control" id="sslDomain" placeholder="example.com" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Check SSL Certificate</button>
+                        </form>
+                        
+                        <div class="loader" id="sslLoader"></div>
+                        
+                        <div id="sslOutput" style="display: none;" class="mt-4">
+                            <div class="mb-2">
+                                <span id="sslStatus" class="badge bg-success">Valid</span>
+                                <span id="sslExpiry"></span>
+                            </div>
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th>Common Name</th>
+                                        <td id="sslCommonName"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Issuer</th>
+                                        <td id="sslIssuer"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Valid From</th>
+                                        <td id="sslValidFrom"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Valid Until</th>
+                                        <td id="sslValidUntil"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Serial Number</th>
+                                        <td id="sslSerialNumber"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Certificate Version</th>
+                                        <td id="sslVersion"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Alternative Names</th>
+                                        <td id="sslAltNames"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container text-center">
+            <p>PyITToolbox - Web Tools</p>
+            <p><small>© 2023 - Made with <i class="bi bi-heart-fill text-danger"></i> for IT Professionals</small></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // HTTP Request Tool
+        // Add Parameter Button
+        document.getElementById('addParam').addEventListener('click', function() {
+            const container = document.getElementById('paramsContainer');
+            const row = document.createElement('div');
+            row.className = 'row param-row mb-2';
+            row.innerHTML = `
+                <div class="col-5">
+                    <input type="text" class="form-control param-key" placeholder="Key">
+                </div>
+                <div class="col-5">
+                    <input type="text" class="form-control param-value" placeholder="Value">
+                </div>
+                <div class="col-2">
+                    <button type="button" class="btn btn-outline-danger remove-param">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(row);
+            
+            // Add event listener to the new remove button
+            row.querySelector('.remove-param').addEventListener('click', function() {
+                container.removeChild(row);
+            });
+        });
+        
+        // Add event listeners to existing remove buttons
+        document.querySelectorAll('.remove-param').forEach(button => {
+            button.addEventListener('click', function() {
+                const row = this.closest('.param-row');
+                document.getElementById('paramsContainer').removeChild(row);
+            });
+        });
+        
+        // Add Header Button
+        document.getElementById('addHeader').addEventListener('click', function() {
+            const container = document.getElementById('headersContainer');
+            const row = document.createElement('div');
+            row.className = 'row header-row mb-2';
+            row.innerHTML = `
+                <div class="col-5">
+                    <input type="text" class="form-control header-key" placeholder="Header Name">
+                </div>
+                <div class="col-5">
+                    <input type="text" class="form-control header-value" placeholder="Header Value">
+                </div>
+                <div class="col-2">
+                    <button type="button" class="btn btn-outline-danger remove-header">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(row);
+            
+            // Add event listener to the new remove button
+            row.querySelector('.remove-header').addEventListener('click', function() {
+                container.removeChild(row);
+            });
+        });
+        
+        // Add event listeners to existing remove header buttons
+        document.querySelectorAll('.remove-header').forEach(button => {
+            button.addEventListener('click', function() {
+                const row = this.closest('.header-row');
+                document.getElementById('headersContainer').removeChild(row);
+            });
+        });
+        
+        // Clear Request Button
+        document.getElementById('clearRequest').addEventListener('click', function() {
+            document.getElementById('httpForm').reset();
+            
+            // Clear params
+            const paramsContainer = document.getElementById('paramsContainer');
+            while (paramsContainer.children.length > 1) {
+                paramsContainer.removeChild(paramsContainer.lastChild);
+            }
+            paramsContainer.querySelector('.param-key').value = '';
+            paramsContainer.querySelector('.param-value').value = '';
+            
+            // Clear headers
+            const headersContainer = document.getElementById('headersContainer');
+            while (headersContainer.children.length > 1) {
+                headersContainer.removeChild(headersContainer.lastChild);
+            }
+            headersContainer.querySelector('.header-key').value = '';
+            headersContainer.querySelector('.header-value').value = '';
+            
+            // Clear body
+            document.getElementById('requestBody').value = '';
+            
+            // Hide response
+            document.getElementById('httpResponse').style.display = 'none';
+        });
+        
+        // Send HTTP Request
+        document.getElementById('httpForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const url = document.getElementById('httpUrl').value;
+            const method = document.getElementById('httpMethod').value;
+            
+            // Get parameters
+            const params = {};
+            document.querySelectorAll('.param-row').forEach(row => {
+                const key = row.querySelector('.param-key').value.trim();
+                const value = row.querySelector('.param-value').value.trim();
+                if (key) {
+                    params[key] = value;
+                }
+            });
+            
+            // Get headers
+            const headers = {};
+            document.querySelectorAll('.header-row').forEach(row => {
+                const key = row.querySelector('.header-key').value.trim();
+                const value = row.querySelector('.header-value').value.trim();
+                if (key) {
+                    headers[key] = value;
+                }
+            });
+            
+            // Add content type header if body is present
+            const contentType = document.getElementById('contentType').value;
+            if (method !== 'GET' && method !== 'HEAD' && document.getElementById('requestBody').value.trim()) {
+                headers['Content-Type'] = contentType;
+            }
+            
+            // Get body
+            const body = document.getElementById('requestBody').value;
+            
+            document.getElementById('httpResponse').style.display = 'none';
+            document.getElementById('httpLoader').style.display = 'block';
+            
+            const startTime = Date.now();
+            
+            fetch('/api/http_request', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    url: url,
+                    method: method,
+                    params: params,
+                    headers: headers,
+                    body: body,
+                    content_type: contentType
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const endTime = Date.now();
+                document.getElementById('httpLoader').style.display = 'none';
+                document.getElementById('httpResponse').style.display = 'block';
+                
+                if (data.error) {
+                    document.getElementById('responseStatus').textContent = 'Error';
+                    document.getElementById('responseStatus').className = 'badge bg-danger';
+                    document.getElementById('responseBody').textContent = data.error;
+                    document.getElementById('responseHeaders').innerHTML = '';
+                    return;
+                }
+                
+                // Set status
+                const statusCode = data.status_code;
+                document.getElementById('responseStatus').textContent = `${statusCode} ${data.status_text}`;
+                
+                if (statusCode >= 200 && statusCode < 300) {
+                    document.getElementById('responseStatus').className = 'badge bg-success';
+                } else if (statusCode >= 300 && statusCode < 400) {
+                    document.getElementById('responseStatus').className = 'badge bg-info';
+                } else if (statusCode >= 400 && statusCode < 500) {
+                    document.getElementById('responseStatus').className = 'badge bg-warning';
+                } else {
+                    document.getElementById('responseStatus').className = 'badge bg-danger';
+                }
+                
+                // Set response time
+                document.getElementById('responseTime').textContent = `${endTime - startTime} ms`;
+                
+                // Set response body
+                document.getElementById('responseBody').textContent = data.body;
+                
+                // Set response headers
+                const headersTable = document.getElementById('responseHeaders');
+                headersTable.innerHTML = '';
+                
+                for (const [key, value] of Object.entries(data.headers)) {
+                    const row = document.createElement('tr');
+                    const headerCell = document.createElement('td');
+                    headerCell.textContent = key;
+                    
+                    const valueCell = document.createElement('td');
+                    valueCell.textContent = value;
+                    
+                    row.appendChild(headerCell);
+                    row.appendChild(valueCell);
+                    headersTable.appendChild(row);
+                }
+            })
+            .catch(error => {
+                document.getElementById('httpLoader').style.display = 'none';
+                document.getElementById('httpResponse').style.display = 'block';
+                document.getElementById('responseStatus').textContent = 'Error';
+                document.getElementById('responseStatus').className = 'badge bg-danger';
+                document.getElementById('responseBody').textContent = 'An error occurred: ' + error;
+                document.getElementById('responseHeaders').innerHTML = '';
+            });
+        });
+        
+        // Format Response Button
+        document.getElementById('formatResponse').addEventListener('click', function() {
+            const responseBody = document.getElementById('responseBody');
+            try {
+                const jsonObj = JSON.parse(responseBody.textContent);
+                responseBody.textContent = JSON.stringify(jsonObj, null, 2);
+            } catch (error) {
+                // Not JSON, do nothing
+            }
+        });
+        
+        // Copy Response Button
+        document.getElementById('copyResponse').addEventListener('click', function() {
+            const responseText = document.getElementById('responseBody').textContent;
+            navigator.clipboard.writeText(responseText)
+                .then(() => {
+                    this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                    setTimeout(() => {
+                        this.innerHTML = 'Copy';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy text: ', err);
+                });
+        });
+        
+        // URL Parser
+        document.getElementById('urlParserForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const url = document.getElementById('urlToParse').value;
+            
+            document.getElementById('urlParserOutput').style.display = 'none';
+            document.getElementById('urlParserLoader').style.display = 'block';
+            
+            fetch('/api/parse_url', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    url: url
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('urlParserLoader').style.display = 'none';
+                document.getElementById('urlParserOutput').style.display = 'block';
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                document.getElementById('urlProtocol').textContent = data.protocol || 'N/A';
+                document.getElementById('urlDomain').textContent = data.domain || 'N/A';
+                document.getElementById('urlPort').textContent = data.port || 'N/A';
+                document.getElementById('urlPath').textContent = data.path || 'N/A';
+                
+                // Display query parameters
+                const paramsContainer = document.getElementById('urlParams');
+                if (Object.keys(data.query_params).length > 0) {
+                    let paramsList = '<ul>';
+                    for (const [key, value] of Object.entries(data.query_params)) {
+                        paramsList += `<li><strong>${key}:</strong> ${value}</li>`;
+                    }
+                    paramsList += '</ul>';
+                    paramsContainer.innerHTML = paramsList;
+                } else {
+                    paramsContainer.textContent = 'N/A';
+                }
+                
+                document.getElementById('urlFragment').textContent = data.fragment || 'N/A';
+            })
+            .catch(error => {
+                document.getElementById('urlParserLoader').style.display = 'none';
+                alert('Error: ' + error);
+            });
+        });
+        
+        // SSL Certificate Checker
+        document.getElementById('sslForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const domain = document.getElementById('sslDomain').value;
+            
+            document.getElementById('sslOutput').style.display = 'none';
+            document.getElementById('sslLoader').style.display = 'block';
+            
+            fetch('/api/check_ssl', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    domain: domain
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('sslLoader').style.display = 'none';
+                document.getElementById('sslOutput').style.display = 'block';
+                
+                if (data.error) {
+                    document.getElementById('sslStatus').textContent = 'Invalid';
+                    document.getElementById('sslStatus').className = 'badge bg-danger';
+                    document.getElementById('sslExpiry').textContent = '';
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                // Set certificate status
+                if (data.valid) {
+                    document.getElementById('sslStatus').textContent = 'Valid';
+                    document.getElementById('sslStatus').className = 'badge bg-success';
+                    
+                    // Calculate days until expiry
+                    const today = new Date();
+                    const expiry = new Date(data.valid_until);
+                    const daysLeft = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
+                    
+                    if (daysLeft <= 30) {
+                        document.getElementById('sslExpiry').innerHTML = `<span class="text-danger">(Expires in ${daysLeft} days)</span>`;
+                    } else {
+                        document.getElementById('sslExpiry').innerHTML = `(Expires in ${daysLeft} days)`;
+                    }
+                } else {
+                    document.getElementById('sslStatus').textContent = 'Invalid';
+                    document.getElementById('sslStatus').className = 'badge bg-danger';
+                    document.getElementById('sslExpiry').textContent = '';
+                }
+                
+                // Fill certificate details
+                document.getElementById('sslCommonName').textContent = data.common_name || 'N/A';
+                document.getElementById('sslIssuer').textContent = data.issuer || 'N/A';
+                document.getElementById('sslValidFrom').textContent = data.valid_from || 'N/A';
+                document.getElementById('sslValidUntil').textContent = data.valid_until || 'N/A';
+                document.getElementById('sslSerialNumber').textContent = data.serial_number || 'N/A';
+                document.getElementById('sslVersion').textContent = data.version || 'N/A';
+                
+                // Set alternative names
+                if (data.alt_names && data.alt_names.length > 0) {
+                    document.getElementById('sslAltNames').textContent = data.alt_names.join(', ') || 'N/A';
+                } else {
+                    document.getElementById('sslAltNames').textContent = 'N/A';
+                }
+            })
+            .catch(error => {
+                document.getElementById('sslLoader').style.display = 'none';
+                alert('Error: ' + error);
+            });
+        });
+    </script>
+</body>
+</html>
+
+                                    

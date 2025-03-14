@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Tools - PyITToolbox</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .footer {
+            margin-top: 50px;
+            padding: 20px 0;
+            background-color: #343a40;
+            color: white;
+        }
+        .tool-output {
+            background-color: #212529;
+            color: #fff;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-tools"></i> PyITToolbox
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="bi bi-house"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/network"><i class="bi bi-globe"></i> Network</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/system"><i class="bi bi-cpu"></i> System</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/security"><i class="bi bi-shield-lock"></i> Security</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/text"><i class="bi bi-file-text"></i> Text</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/web"><i class="bi bi-browser-chrome"></i> Web</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/file"><i class="bi bi-file-earmark"></i> File</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row mb-4">
+            <div class="col">
+                <h1><i class="bi bi-shield-lock"></i> Security Tools</h1>
+                <p class="lead">Generate passwords, encrypt data, and hash information securely</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Password Generator -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h5><i class="bi bi-key"></i> Password Generator</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="passwordForm">
+                            <div class="mb-3">
+                                <label for="passwordLength" class="form-label">Password Length</label>
+                                <input type="number" class="form-control" id="passwordLength" min="6" max="64" value="16">
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="useUppercase" checked>
+                                    <label class="form-check-label" for="useUppercase">Include Uppercase Letters</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="useLowercase" checked>
+                                    <label class="form-check-label" for="useLowercase">Include Lowercase Letters</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="useNumbers" checked>
+                                    <label class="form-check-label" for="useNumbers">Include Numbers</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="useSpecial" checked>
+                                    <label class="form-check-label" for="useSpecial">Include Special Characters</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-danger">Generate Password</button>
+                        </form>
+                        <div class="loader" id="passwordLoader"></div>
+                        <div class="mt-3" id="passwordOutput" style="display: none;">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="generatedPassword" readonly>
+                                <button class="btn btn-outline-secondary" type="button" id="copyPassword">
+                                    <i class="bi bi-clipboard"></i> Copy
+                                </button>
+                            </div>
+                            <div class="mt-3">
+                                <div class="progress" style="height: 5px;">
+                                    <div id="passwordStrengthBar" class="progress-bar" role="progressbar" style="width: 0%;"></div>
+                                </div>
+                                <small id="passwordStrength" class="form-text"></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hash Calculator -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h5><i class="bi bi-hash"></i> Hash Calculator</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="hashForm">
+                            <div class="mb-3">
+                                <label for="textToHash" class="form-label">Text to Hash</label>
+                                <textarea class="form-control" id="textToHash" rows="4" placeholder="Enter text to hash"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="hashAlgorithm" class="form-label">Algorithm</label>
+                                <select class="form-select" id="hashAlgorithm">
+                                    <option value="md5">MD5</option>
+                                    <option value="sha1">SHA-1</option>
+                                    <option value="sha256" selected>SHA-256</option>
+                                    <option value="sha512">SHA-512</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-danger">Calculate Hash</button>
+                        </form>
+                        <div class="loader" id="hashLoader"></div>
+                        <div class="mt-3" id="hashOutput" style="display: none;">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="hashResult" readonly>
+                                <button class="btn btn-outline-secondary" type="button" id="copyHash">
+                                    <i class="bi bi-clipboard"></i> Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Encryption/Decryption Tool -->
+            <div class="col-md-12 mt-4">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h5><i class="bi bi-lock"></i> Encryption/Decryption Tool</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <form id="encryptForm">
+                                    <div class="mb-3">
+                                        <label for="plainText" class="form-label">Plain Text</label>
+                                        <textarea class="form-control" id="plainText" rows="5" placeholder="Enter text to encrypt"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="encryptKey" class="form-label">Encryption Key</label>
+                                        <input type="text" class="form-control" id="encryptKey" placeholder="Enter encryption key">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="encryptMethod" class="form-label">Method</label>
+                                        <select class="form-select" id="encryptMethod">
+                                            <option value="aes">AES-256</option>
+                                            <option value="fernet">Fernet</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-danger">Encrypt</button>
+                                </form>
+                                <div class="loader" id="encryptLoader"></div>
+                                <div class="mt-3" id="encryptOutput" style="display: none;">
+                                    <div class="input-group">
+                                        <textarea class="form-control" id="encryptResult" rows="3" readonly></textarea>
+                                        <button class="btn btn-outline-secondary" type="button" id="copyEncrypt">
+                                            <i class="bi bi-clipboard"></i> Copy
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <form id="decryptForm">
+                                    <div class="mb-3">
+                                        <label for="cipherText" class="form-label">Cipher Text</label>
+                                        <textarea class="form-control" id="cipherText" rows="5" placeholder="Enter text to decrypt"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="decryptKey" class="form-label">Decryption Key</label>
+                                        <input type="text" class="form-control" id="decryptKey" placeholder="Enter decryption key">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="decryptMethod" class="form-label">Method</label>
+                                        <select class="form-select" id="decryptMethod">
+                                            <option value="aes">AES-256</option>
+                                            <option value="fernet">Fernet</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-danger">Decrypt</button>
+                                </form>
+                                <div class="loader" id="decryptLoader"></div>
+                                <div class="mt-3" id="decryptOutput" style="display: none;">
+                                    <div class="input-group">
+                                        <textarea class="form-control" id="decryptResult" rows="3" readonly></textarea>
+                                        <button class="btn btn-outline-secondary" type="button" id="copyDecrypt">
+                                            <i class="bi bi-clipboard"></i> Copy
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container text-center">
+            <p>PyITToolbox - Security Tools</p>
+            <p><small>© 2023 - Made with <i class="bi bi-heart-fill text-danger"></i> for IT Professionals</small></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Password Generator
+        document.getElementById('passwordForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const length = document.getElementById('passwordLength').value;
+            const uppercase = document.getElementById('useUppercase').checked;
+            const lowercase = document.getElementById('useLowercase').checked;
+            const numbers = document.getElementById('useNumbers').checked;
+            const special = document.getElementById('useSpecial').checked;
+            
+            if (!uppercase && !lowercase && !numbers && !special) {
+                alert('Please select at least one character type');
+                return;
+            }
+            
+            document.getElementById('passwordOutput').style.display = 'none';
+            document.getElementById('passwordLoader').style.display = 'block';
+            
+            fetch('/api/generate_password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    length: length,
+                    uppercase: uppercase,
+                    lowercase: lowercase,
+                    numbers: numbers,
+                    special: special
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('passwordLoader').style.display = 'none';
+                document.getElementById('passwordOutput').style.display = 'block';
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                document.getElementById('generatedPassword').value = data.password;
+                
+                // Display password strength
+                const strengthBar = document.getElementById('passwordStrengthBar');
+                const strengthText = document.getElementById('passwordStrength');
+                const strength = data.strength;
+                
+                strengthBar.style.width = strength.score * 25 + '%';
+                strengthText.textContent = 'Strength: ' + strength.message;
+                
+                if (strength.score <= 1) {
+                    strengthBar.className = 'progress-bar bg-danger';
+                } else if (strength.score === 2) {
+                    strengthBar.className = 'progress-bar bg-warning';
+                } else if (strength.score === 3) {
+                    strengthBar.className = 'progress-bar bg-info';
+                } else {
+                    strengthBar.className = 'progress-bar bg-success';
+                }
+            })
+            .catch(error => {
+                document.getElementById('passwordLoader').style.display = 'none';
+                alert('Error: ' + error);
+            });
+        });
+        
+        // Copy password to clipboard
+        document.getElementById('copyPassword').addEventListener('click', function() {
+            const passwordField = document.getElementById('generatedPassword');
+            passwordField.select();
+            document.execCommand('copy');
+            this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+            setTimeout(() => {
+                this.innerHTML = '<i class="bi bi-clipboard"></i> Copy';
+            }, 2000);
+        });
+        
+        // Hash Calculator
+        document.getElementById('hashForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const text = document.getElementById('textToHash').value;
+            const algorithm = document.getElementById('hashAlgorithm').value;
+            
+            if (!text) {
+                alert('Please enter text to hash');
+                return;
+            }
+            
+            document.getElementById('hashOutput').style.display = 'none';
+            document.getElementById('hashLoader').style.display = 'block';
+            
+            fetch('/api/calculate_hash', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: text,
+                    algorithm: algorithm
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('hashLoader').style.display = 'none';
+                document.getElementById('hashOutput').style.display = 'block';
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                document.getElementById('hashResult').value = data.hash;
+            })
+            .catch(error => {
+                document.getElementById('hashLoader').style.display = 'none';
+                alert('Error: ' + error);
+            });
+        });
+        
+        // Copy hash to clipboard
+        document.getElementById('copyHash').addEventListener('click', function() {
+            const hashField = document.getElementById('hashResult');
+            hashField.select();
+            document.execCommand('copy');
+            this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+            setTimeout(() => {
+                this.innerHTML = '<i class="bi bi-clipboard"></i> Copy';
+            }, 2000);
+        });
+        
+        // Encryption
+        document.getElementById('encryptForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const text = document.getElementById('plainText').value;
+            const key = document.getElementById('encryptKey').value;
+            const method = document.getElementById('encryptMethod').value;
+            
+            if (!text) {
+                alert('Please enter text to encrypt');
+                return;
+            }
+            
+            if (!key) {
+                alert('Please enter an encryption key');
+                return;
+            }
+            
+            document.getElementById('encryptOutput').style.display = 'none';
+            document.getElementById('encryptLoader').style.display = 'block';
+            
+            fetch('/api/encrypt', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: text,
+                    key: key,
+                    method: method
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('encryptLoader').style.display = 'none';
+                document.getElementById('encryptOutput').style.display = 'block';
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                document.getElementById('encryptResult').value = data.result;
+            })
+            .catch(error => {
+                document.getElementById('encryptLoader').style.display = 'none';
+                alert('Error: ' + error);
+            });
+        });
+        
+        // Copy encrypted text to clipboard
+        document.getElementById('copyEncrypt').addEventListener('click', function() {
+            const field = document.getElementById('encryptResult');
+            field.select();
+            document.execCommand('copy');
+            this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+            setTimeout(() => {
+                this.innerHTML = '<i class="bi bi-clipboard"></i> Copy';
+            }, 2000);
+        });
+        
+        // Decryption
+        document.getElementById('decryptForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const text = document.getElementById('cipherText').value;
+            const key = document.getElementById('decryptKey').value;
+            const method = document.getElementById('decryptMethod').value;
+            
+            if (!text) {
+                alert('Please enter text to decrypt');
+                return;
+            }
+            
+            if (!key) {
+                alert('Please enter a decryption key');
+                return;
+            }
+            
+            document.getElementById('decryptOutput').style.display = 'none';
+            document.getElementById('decryptLoader').style.display = 'block';
+            
+            fetch('/api/decrypt', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: text,
+                    key: key,
+                    method: method
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('decryptLoader').style.display = 'none';
+                document.getElementById('decryptOutput').style.display = 'block';
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                document.getElementById('decryptResult').value = data.result;
+            })
+            .catch(error => {
+                document.getElementById('decryptLoader').style.display = 'none';
+                alert('Error: ' + error);
+            });
+        });
+        
+        // Copy decrypted text to clipboard
+        document.getElementById('copyDecrypt').addEventListener('click', function() {
+            const field = document.getElementById('decryptResult');
+            field.select();
+            document.execCommand('copy');
+            this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+            setTimeout(() => {
+                this.innerHTML = '<i class="bi bi-clipboard"></i> Copy';
+            }, 2000);
+        });
+        
+        // Sync the method selection between encrypt and decrypt forms
+        document.getElementById('encryptMethod').addEventListener('change', function() {
+            document.getElementById('decryptMethod').value = this.value;
+        });
+        
+        document.getElementById('decryptMethod').addEventListener('change', function() {
+            document.getElementById('encryptMethod').value = this.value;
+        });
+    </script>
+</body>
+</html>
+

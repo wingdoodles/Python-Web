@@ -1,0 +1,2107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Development Tools - System Monitoring</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        /* Base Styles */
+        :root {
+            --primary-color: #4a6cf7;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --info-color: #17a2b8;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-color: #dee2e6;
+            --border-radius: 4px;
+            --background-color: #f5f7fb;
+            --card-background: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.5;
+            color: #333;
+            background-color: var(--background-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+
+        /* Dev Tools Layout */
+        .development-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background-color: var(--background-color);
+        }
+
+        .dev-tabs {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .dev-tab-navigation {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--card-background);
+            padding: 0 15px;
+        }
+
+        .dev-tab-item {
+            padding: 12px 16px;
+            margin-right: 2px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--secondary-color);
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .dev-tab-item:hover {
+            color: var(--primary-color);
+        }
+
+        .dev-tab-item.active {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .dev-tab-content {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+            background-color: var(--card-background);
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .dev-tab-pane {
+            display: none;
+            height: 100%;
+        }
+
+        .dev-tab-pane.active {
+            display: block;
+        }
+
+        /* Form Controls */
+        .form-control {
+            display: block;
+            width: 100%;
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #495057;
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid #ced4da;
+            border-radius: var(--border-radius);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .form-control:focus {
+            color: #495057;
+            background-color: #fff;
+            border-color: var(--primary-color);
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(74, 108, 247, 0.25);
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .btn {
+            display: inline-block;
+            font-weight: 400;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            user-select: none;
+            border: 1px solid transparent;
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border-radius: var(--border-radius);
+            transition: all 0.15s ease-in-out;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            color: #fff;
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #3a5ce4;
+            border-color: #3a5ce4;
+        }
+
+        .btn-secondary {
+            color: #fff;
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #5a6268;
+        }
+
+        .btn-danger {
+            color: #fff;
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        /* Cards */
+        .card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            word-wrap: break-word;
+            background-color: #fff;
+            background-clip: border-box;
+            border: 1px solid rgba(0, 0, 0, 0.125);
+            border-radius: var(--border-radius);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
+
+        .card-header {
+            padding: 0.75rem 1.25rem;
+            margin-bottom: 0;
+            background-color: rgba(0, 0, 0, 0.03);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-body {
+            flex: 1 1 auto;
+            padding: 1.25rem;
+        }
+
+        /* Regex Tester Specific Styles */
+        .regex-tester-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: auto auto auto;
+            gap: 20px;
+        }
+
+        @media (min-width: 992px) {
+            .regex-tester-container {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto auto;
+            }
+            .regex-input-panel {
+                grid-column: 1;
+                grid-row: 1;
+            }
+            .regex-results-panel {
+                grid-column: 2;
+                grid-row: 1 / span 2;
+            }
+            .regex-history-panel {
+                grid-column: 1;
+                grid-row: 2;
+            }
+        }
+
+        .regex-flags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .flag-checkbox {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .flag-checkbox input {
+            margin-right: 5px;
+        }
+
+        .regex-matches {
+            margin-top: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .match-item {
+            padding: 8px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: #f8f9fa;
+        }
+
+        .match-value {
+            font-family: monospace;
+            word-break: break-all;
+            background-color: rgba(74, 108, 247, 0.1);
+            padding: 4px;
+            border-radius: 3px;
+        }
+
+        .match-groups {
+            margin-top: 10px;
+        }
+
+        .group-item {
+            font-family: monospace;
+            padding: 4px;
+            margin: 2px 0;
+        }
+
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+        }
+
+        .history-item {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-pattern {
+            font-family: monospace;
+            margin-right: 10px;
+        }
+
+        .regex-status {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: var(--border-radius);
+        }
+
+        .regex-status.error {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--danger-color);
+        }
+
+        .regex-status.success {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+        }
+
+        /* API Tools Specific Styles */
+        .api-tools-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: auto auto auto;
+            gap: 20px;
+        }
+
+        @media (min-width: 992px) {
+            .api-tools-container {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto auto;
+            }
+            .api-request-panel {
+                grid-column: 1;
+                grid-row: 1;
+            }
+            .api-response-panel {
+                grid-column: 2;
+                grid-row: 1 / span 2;
+            }
+            .api-history-panel {
+                grid-column: 1;
+                grid-row: 2;
+            }
+        }
+
+        .api-url-container {
+            display: flex;
+        }
+
+        .api-method-select {
+            width: 120px;
+            margin-right: 10px;
+        }
+
+        .api-url-input {
+            flex: 1;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 15px;
+        }
+
+        .tab-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 0.9rem;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-item.active {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .headers-table, .params-table {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .headers-table td, .params-table td {
+            padding: 5px;
+        }
+
+        .headers-table input, .params-table input {
+            width: 100%;
+        }
+
+        .headers-table .remove-row, .params-table .remove-row {
+            cursor: pointer;
+            color: var(--danger-color);
+        }
+
+        .add-row-btn {
+            margin-bottom: 10px;
+        }
+
+        .response-container {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .response-header {
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .response-status {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .status-success {
+            background-color: rgba(40, 167, 69, 0.2);
+            color: var(--success-color);
+        }
+
+        .status-error {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: var(--danger-color);
+        }
+
+        .status-warning {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #856404;
+        }
+
+        .response-body {
+            padding: 10px;
+            max-height: 400px;
+            overflow: auto;
+            background-color: #f8f9fa;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .response-json {
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Code Snippets Specific Styles */
+        .snippets-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 992px) {
+            .snippets-container {
+                grid-template-columns: 300px 1fr;
+            }
+        }
+
+        .snippets-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 992px) {
+            .snippets-container {
+                grid-template-columns: 300px 1fr;
+            }
+        }
+
+        .snippets-list {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .snippets-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .snippets-search {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            margin-bottom: 10px;
+        }
+
+        .snippet-items {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .snippet-item {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .snippet-item:hover {
+            background-color: rgba(74, 108, 247, 0.05);
+        }
+
+        .snippet-item.active {
+            background-color: rgba(74, 108, 247, 0.1);
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .snippet-item-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .snippet-item-info {
+            font-size: 0.85rem;
+            color: var(--secondary-color);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .snippet-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .snippet-tag {
+            background-color: rgba(74, 108, 247, 0.1);
+            color: var(--primary-color);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+        }
+
+        .snippet-editor {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            height: 100%;
+        }
+
+        .snippet-form {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .snippet-code-editor {
+            flex: 1;
+            min-height: 300px;
+            border-top: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .code-editor {
+            width: 100%;
+            height: 100%;
+            font-family: monospace;
+            resize: none;
+            border: none;
+            padding: 10px;
+        }
+
+        .no-snippet-selected {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--secondary-color);
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Utility classes */
+        .d-flex {
+            display: flex;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .align-center {
+            align-items: center;
+        }
+
+        .mb-1 {
+            margin-bottom: 0.25rem;
+        }
+
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .mb-3 {
+            margin-bottom: 1rem;
+        }
+
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+
+        .mt-3 {
+            margin-top: 1rem;
+        }
+
+        .p-2 {
+            padding: 0.5rem;
+        }
+
+        .text-danger {
+            color: var(--danger-color);
+        }
+
+        .text-success {
+            color: var(--success-color);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .monospace {
+            font-family: monospace;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 0.2rem solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spinner 0.75s linear infinite;
+        }
+
+        @keyframes spinner {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-tools"></i> PyITToolbox
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="bi bi-house"></i> Home</a>
+                    </li>
+                    <!-- Dropdown for Tools -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-tools"></i> All Tools
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/network"><i class="bi bi-globe"></i> Network Tools</a></li>
+                            <li><a class="dropdown-item" href="/system"><i class="bi bi-cpu"></i> System Tools</a></li>
+                            <li><a class="dropdown-item" href="/security"><i class="bi bi-shield-lock"></i> Security Tools</a></li>
+                            <li><a class="dropdown-item" href="/text"><i class="bi bi-file-text"></i> Text Tools</a></li>
+                            <li><a class="dropdown-item" href="/web"><i class="bi bi-browser-chrome"></i> Web Tools</a></li>
+                            <li><a class="dropdown-item" href="/file"><i class="bi bi-file-earmark"></i> File Tools</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/database"><i class="bi bi-database"></i> Database Tools</a></li>
+                            <li><a class="dropdown-item" href="/logs"><i class="bi bi-journal-text"></i> Log Analysis</a></li>
+                            <li><a class="dropdown-item" href="/convert"><i class="bi bi-arrow-left-right"></i> Conversion Tools</a></li>
+                            <li><a class="dropdown-item" href="/monitor"><i class="bi bi-graph-up"></i> Monitoring</a></li>
+                            <li><a class="dropdown-item" href="/monitor2"><i class="bi bi-code-square"></i> Monitoring 2</a></li>
+                            <li><a class="dropdown-item active" href="/dev"><i class="bi bi-code-square"></i> Development</a></li>
+                            <li><a class="dropdown-item" href="/infrastructure"><i class="bi bi-hdd-rack"></i> Infrastructure</a></li>
+                            <li><a class="dropdown-item" href="/backup"><i class="bi bi-cloud-arrow-up"></i> Backup & Recovery</a></li>
+                            <li><a class="dropdown-item" href="/collab"><i class="bi bi-people"></i> Collaboration</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="development-container">
+            <div class="dev-tabs">
+                <nav class="dev-tab-navigation">
+                    <button class="dev-tab-item active" data-tab="regex-tester">Regex Tester</button>
+                    <button class="dev-tab-item" data-tab="api-tools">API Tools</button>
+                    <button class="dev-tab-item" data-tab="code-snippets">Code Snippets</button>
+                </nav>
+                
+                <div class="dev-tab-content">
+                    <!-- Regex Tester Tab -->
+                    <div class="dev-tab-pane active" id="regex-tester">
+                        <div class="regex-tester-container">
+                            <div class="regex-input-panel card">
+                                <div class="card-header">
+                                    <h4>Regex Pattern</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="input-group">
+                                        <label for="regex-pattern">Regular Expression:</label>
+                                        <input type="text" id="regex-pattern" class="form-control" placeholder="Enter regex pattern...">
+                                    </div>
+                                    
+                                    <div class="input-group">
+                                        <label>Flags:</label>
+                                        <div class="regex-flags">
+                                            <label class="flag-checkbox">
+                                                <input type="checkbox" id="flag-i" value="i">
+                                                <span>i (case insensitive)</span>
+                                            </label>
+                                            <label class="flag-checkbox">
+                                                <input type="checkbox" id="flag-m" value="m">
+                                                <span>m (multiline)</span>
+                                            </label>
+                                            <label class="flag-checkbox">
+                                                <input type="checkbox" id="flag-s" value="s">
+                                                <span>s (dotall)</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="input-group">
+                                        <label for="regex-text">Test String:</label>
+                                        <textarea id="regex-text" class="form-control" rows="6" placeholder="Enter text to test the regex against..."></textarea>
+                                    </div>
+                                    
+                                    <button id="test-regex-btn" class="btn btn-primary">Test Regex</button>
+                                    <div id="regex-loading" class="spinner hidden mt-2"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="regex-results-panel card">
+                                <div class="card-header">
+                                    <h4>Results</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="regex-status"></div>
+                                    <div id="regex-matches" class="regex-matches">
+                                        <div class="no-matches">No matches yet. Enter a pattern and test string to get started.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="regex-history-panel card">
+                                <div class="card-header">
+                                    <h4>Recent Patterns</h4>
+                                    <button id="clear-regex-history" class="btn btn-sm btn-secondary">Clear All</button>
+                                </div>
+                                <div class="card-body">
+                                    <div id="regex-history" class="history-list">
+                                        <div class="no-history">No history yet.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- API Tools Tab -->
+                    <div class="dev-tab-pane" id="api-tools">
+                        <div class="api-tools-container">
+                            <div class="api-request-panel card">
+                                <div class="card-header">
+                                    <h4>API Request</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="input-group">
+                                        <div class="api-url-container">
+                                            <select id="api-method" class="form-control api-method-select">
+                                                <option value="GET">GET</option>
+                                                <option value="POST">POST</option>
+                                                <option value="PUT">PUT</option>
+                                                <option value="DELETE">DELETE</option>
+                                                <option value="PATCH">PATCH</option>
+                                                <option value="HEAD">HEAD</option>
+                                                <option value="OPTIONS">OPTIONS</option>
+                                            </select>
+                                            <input type="text" id="api-url" class="form-control api-url-input" placeholder="https://api.example.com/endpoint">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="tabs">
+                                        <button class="tab-item active" data-tab="headers">Headers</button>
+                                        <button class="tab-item" data-tab="body">Body</button>
+                                    </div>
+                                    
+                                    <div class="tab-pane active" id="headers">
+                                        <button id="add-header" class="btn btn-sm btn-secondary add-row-btn">Add Header</button>
+                                        <table class="headers-table">
+                                            <tbody id="headers-list">
+                                                <tr>
+                                                    <td><input type="text" class="form-control" placeholder="Content-Type" value="Content-Type"></td>
+                                                    <td><input type="text" class="form-control" placeholder="application/json" value="application/json"></td>
+                                                    <td><span class="remove-row">&times;</span></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <div class="tab-pane" id="body">
+                                        <textarea id="request-body" class="form-control" rows="10" placeholder='{"key": "value"}'></textarea>
+                                    </div>
+                                    
+                                    <button id="send-request" class="btn btn-primary mt-3">Send Request</button>
+                                    <div id="api-loading" class="spinner hidden mt-2"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="api-response-panel card">
+                                <div class="card-header">
+                                    <h4>Response</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div id="response-container" class="response-container hidden">
+                                        <div class="response-header">
+                                            <span id="response-status" class="response-status"></span>
+                                            <span id="response-time"></span>
+                                        </div>
+                                        <div class="tabs">
+                                            <button class="tab-item active" data-tab="response-body">Body</button>
+                                            <button class="tab-item" data-tab="response-headers">Headers</button>
+                                        </div>
+                                        <div class="tab-pane active" id="response-body">
+                                            <div id="response-body-content" class="response-body"></div>
+                                        </div>
+                                        <div class="tab-pane" id="response-headers">
+                                            <div id="response-headers-content" class="response-body"></div>
+                                        </div>
+                                    </div>
+                                    <div id="no-response" class="p-2">
+                                        No response yet. Send a request to see results.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="api-history-panel card">
+                                <div class="card-header">
+                                    <h4>History</h4>
+                                    <button id="clear-api-history" class="btn btn-sm btn-secondary">Clear All</button>
+                                </div>
+                                <div class="card-body">
+                                    <div id="api-history" class="history-list">
+                                        <div class="no-history">No history yet.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Code Snippets Tab -->
+                    <div class="dev-tab-pane" id="code-snippets">
+                        <div class="snippets-container">
+                            <div class="snippets-sidebar">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4>Snippets</h4>
+                                        <button id="new-snippet" class="btn btn-sm btn-primary">New</button>
+                                    </div>
+                                    <div class="card-body">
+                                        <input type="text" id="snippet-search" class="snippets-search" placeholder="Search snippets...">
+                                        <div id="snippet-items" class="snippet-items">
+                                            <div class="no-snippets">No snippets yet. Create a new one to get started.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="snippet-content">
+                                <div id="no-snippet-selected" class="no-snippet-selected">
+                                    <h3>No Snippet Selected</h3>
+                                    <p>Select a snippet from the list or create a new one.</p>
+                                    <button id="create-first-snippet" class="btn btn-primary mt-3">Create New Snippet</button>
+                                </div>
+                                
+                                <div id="snippet-editor" class="snippet-editor hidden">
+                                    <div class="snippet-form">
+                                        <div class="input-group">
+                                            <label for="snippet-title">Title:</label>
+                                            <input type="text" id="snippet-title" class="form-control" placeholder="Snippet title">
+                                        </div>
+                                        
+                                        <div class="input-group">
+                                            <label for="snippet-language">Language:</label>
+                                            <select id="snippet-language" class="form-control">
+                                                <option value="text">Plain Text</option>
+                                                <option value="javascript">JavaScript</option>
+                                                <option value="python">Python</option>
+                                                <option value="html">HTML</option>
+                                                <option value="css">CSS</option>
+                                                <option value="json">JSON</option>
+                                                <option value="sql">SQL</option>
+                                                <option value="bash">Bash</option>
+                                                <option value="php">PHP</option>
+                                                <option value="csharp">C#</option>
+                                                <option value="java">Java</option>
+                                                <option value="go">Go</option>
+                                                <option value="ruby">Ruby</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="input-group">
+                                            <label for="snippet-description">Description:</label>
+                                            <textarea id="snippet-description" class="form-control" rows="2" placeholder="Snippet description (optional)"></textarea>
+                                        </div>
+                                        
+                                        <div class="input-group">
+                                            <label for="snippet-tags">Tags (comma separated):</label>
+                                            <input type="text" id="snippet-tags" class="form-control" placeholder="tag1, tag2, tag3">
+                                        </div>
+                                        
+                                        <div class="d-flex justify-between mt-3">
+                                            <button id="save-snippet" class="btn btn-primary">Save</button>
+                                            <button id="delete-snippet" class="btn btn-danger">Delete</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="snippet-code-editor">
+                                        <textarea id="code-editor" class="code-editor" placeholder="// Enter your code here..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for the Development Tools -->
+    <script>
+        // Utility functions
+        function $(selector) {
+            return document.querySelector(selector);
+        }
+
+        function $$(selector) {
+            return document.querySelectorAll(selector);
+        }
+
+        function formatDateTime(isoString) {
+            const date = new Date(isoString);
+            return date.toLocaleString();
+        }
+
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function formatJson(json) {
+            return JSON.stringify(json, null, 2);
+        }
+
+        async function fetchApi(url, options = {}) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error("API Error:", error);
+                return { error: error.message };
+            }
+        }
+
+        // Tab navigation
+        function setupTabs() {
+            const tabItems = $$('.dev-tab-item');
+            tabItems.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    tabItems.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Show corresponding tab pane
+                    $$('.dev-tab-pane').forEach(pane => {
+                        pane.classList.remove('active');
+                    });
+                    $(`#${tabId}`).classList.add('active');
+                });
+            });
+
+            // Setup inner tabs (for API tools, etc.)
+            $$('.tabs').forEach(tabGroup => {
+                const tabButtons = tabGroup.querySelectorAll('.tab-item');
+                tabButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const tabId = button.getAttribute('data-tab');
+                        
+                        // Update active tab in this group
+                        tabButtons.forEach(b => b.classList.remove('active'));
+                        button.classList.add('active');
+                        
+                        // Find parent container and show corresponding tab pane
+                        const parent = button.closest('.card-body');
+                        if (parent) {
+                            parent.querySelectorAll('.tab-pane').forEach(pane => {
+                                pane.classList.remove('active');
+                            });
+                            parent.querySelector(`#${tabId}`).classList.add('active');
+                        }
+                    });
+                });
+            });
+        }
+
+        // Regex Tester
+        function setupRegexTester() {
+            const patternInput = $('#regex-pattern');
+            const textInput = $('#regex-text');
+            const testButton = $('#test-regex-btn');
+            const flagI = $('#flag-i');
+            const flagM = $('#flag-m');
+            const flagS = $('#flag-s');
+            const matchesContainer = $('#regex-matches');
+            const statusContainer = $('.regex-status');
+            const historyContainer = $('#regex-history');
+            const clearHistoryBtn = $('#clear-regex-history');
+            const loadingSpinner = $('#regex-loading');
+
+            // Load regex history
+            async function loadRegexHistory() {
+                loadingSpinner.classList.remove('hidden');
+                
+                try {
+                    const response = await fetchApi('/api/dev/regex/history');
+                    
+                    if (response && response.history) {
+                        if (response.history.length === 0) {
+                            historyContainer.innerHTML = '<div class="no-history">No history yet.</div>';
+                            return;
+                        }
+                        
+                        let html = '';
+                        response.history.forEach(item => {
+                            html += `
+                                <div class="history-item" data-id="${item.id}">
+                                    <div class="history-pattern">${escapeHtml(item.pattern)}</div>
+                                    <div>
+                                        <span class="history-flags">${item.flags || '-'}</span>
+                                        <button class="btn btn-sm btn-danger history-delete">×</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        historyContainer.innerHTML = html;
+                        
+                        // Add click event to use pattern from history
+                        $$('.history-item').forEach(item => {
+                            item.addEventListener('click', (e) => {
+                                if (!e.target.classList.contains('history-delete')) {
+                                    const pattern = item.querySelector('.history-pattern').textContent;
+                                    const flags = item.querySelector('.history-flags').textContent;
+                                    
+                                    patternInput.value = pattern;
+                                    flagI.checked = flags.includes('i');
+                                    flagM.checked = flags.includes('m');
+                                    flagS.checked = flags.includes('s');
+                                }
+                            });
+                        });
+                        
+                        // Add delete event
+                        $$('.history-delete').forEach(btn => {
+                            btn.addEventListener('click', async (e) => {
+                                e.stopPropagation();
+                                const historyId = btn.closest('.history-item').getAttribute('data-id');
+                                await fetchApi(`/api/dev/regex/history/${historyId}`, { method: 'DELETE' });
+                                loadRegexHistory();
+                            });
+                        });
+                    }
+                } catch (error) {
+                    console.error("Failed to load regex history:", error);
+                } finally {
+                    loadingSpinner.classList.add('hidden');
+                }
+            }
+
+            // Test regex
+            async function testRegex() {
+                const pattern = patternInput.value;
+                const text = textInput.value;
+                
+                if (!pattern) {
+                    statusContainer.textContent = "Please enter a regular expression pattern";
+                    statusContainer.className = "regex-status error";
+                    return;
+                }
+                
+                let flags = '';
+                if (flagI.checked) flags += 'i';
+                if (flagM.checked) flags += 'm';
+                if (flagS.checked) flags += 's';
+                
+                loadingSpinner.classList.remove('hidden');
+                
+                try {
+                    const response = await fetchApi('/api/dev/regex/test', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ pattern, text, flags })
+                    });
+                    
+                    if (response.error) {
+                        statusContainer.textContent = `Error: ${response.error}`;
+                        statusContainer.className = "regex-status error";
+                        matchesContainer.innerHTML = '<div class="no-matches">An error occurred.</div>';
+                    } else if (!response.is_valid) {
+                        statusContainer.textContent = `Invalid regex: ${response.error}`;
+                        statusContainer.className = "regex-status error";
+                        matchesContainer.innerHTML = '<div class="no-matches">Invalid regular expression.</div>';
+                    } else if (response.matches.length === 0) {
+                        statusContainer.textContent = "No matches found";
+                        statusContainer.className = "regex-status";
+                        matchesContainer.innerHTML = '<div class="no-matches">No matches found in the test string.</div>';
+                    } else {
+                        statusContainer.textContent = `${response.matches.length} match(es) found`;
+                        statusContainer.className = "regex-status success";
+                        
+                        let html = '';
+                        response.matches.forEach((match, index) => {
+                            html += `
+                                <div class="match-item">
+                                    <div class="match-index">Match ${index + 1}</div>
+                                    <div class="match-value">${escapeHtml(match.value)}</div>
+                                    <div class="match-position">Position: ${match.start} - ${match.end}</div>
+                            `;
+                            
+                            if (match.groups && match.groups.length > 0) {
+                                html += '<div class="match-groups">';
+                                match.groups.forEach(group => {
+                                    html += `
+                                        <div class="group-item">
+                                            Group ${group.index}${group.name ? ' (' + group.name + ')' : ''}: 
+                                            <span class="group-value">${escapeHtml(group.value)}</span>
+                                        </div>
+                                    `;
+                                });
+                                html += '</div>';
+                            }
+                            
+                            html += '</div>';
+                        });
+                        
+                        matchesContainer.innerHTML = html;
+                    }
+                    
+                    // Refresh history
+                    loadRegexHistory();
+                    
+                } catch (error) {
+                    console.error("Failed to test regex:", error);
+                    statusContainer.textContent = `Error: ${error.message}`;
+                    statusContainer.className = "regex-status error";
+                } finally {
+                    loadingSpinner.classList.add('hidden');
+                }
+            }
+
+            // Clear history
+            async function clearHistory() {
+                if (confirm("Are you sure you want to clear all regex history?")) {
+                    // Delete each history item
+                    const items = $$('.history-item');
+                    for (const item of items) {
+                        const historyId = item.getAttribute('data-id');
+                        await fetchApi(`/api/dev/regex/history/${historyId}`, { method: 'DELETE' });
+                    }
+                    
+                    // Refresh history
+                    loadRegexHistory();
+                }
+            }
+
+            // Event listeners
+            testButton.addEventListener('click', testRegex);
+            clearHistoryBtn.addEventListener('click', clearHistory);
+            
+            // Also test on Enter key in pattern input
+            patternInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    testRegex();
+                }
+            });
+            
+            // Initial load
+            loadRegexHistory();
+        }
+
+        // API Tools
+        function setupApiTools() {
+            const methodSelect = $('#api-method');
+            const urlInput = $('#api-url');
+            const headersTable = $('#headers-list');
+            const addHeaderBtn = $('#add-header');
+            const requestBodyInput = $('#request-body');
+            const sendRequestBtn = $('#send-request');
+            const responseContainer = $('#response-container');
+            const noResponseContainer = $('#no-response');
+            const responseStatus = $('#response-status');
+            const responseTime = $('#response-time');
+            const responseBodyContent = $('#response-body-content');
+            const responseHeadersContent = $('#response-headers-content');
+            const apiHistoryContainer = $('#api-history');
+            const clearApiHistoryBtn = $('#clear-api-history');
+            const apiLoadingSpinner = $('#api-loading');
+
+            // Load API history
+            async function loadApiHistory() {
+                apiLoadingSpinner.classList.remove('hidden');
+                
+                try {
+                    const response = await fetchApi('/api/dev/api/history');
+                    
+                    if (response && response.history) {
+                        if (response.history.length === 0) {
+                            apiHistoryContainer.innerHTML = '<div class="no-history">No history yet.</div>';
+                            return;
+                        }
+                        
+                        let html = '';
+                        response.history.forEach(item => {
+                            let statusClass = 'status-success';
+                            if (item.response.status >= 400) {
+                                statusClass = 'status-error';
+                            } else if (item.response.status >= 300) {
+                                statusClass = 'status-warning';
+                            }
+                            
+                            html += `
+                                <div class="history-item" data-id="${item.id}">
+                                    <div>
+                                        <div class="d-flex align-center">
+                                            <span class="api-method">${item.method}</span>
+                                            <span class="api-url monospace ml-2">${escapeHtml(item.url)}</span>
+                                        </div>
+                                        <div class="history-date">${formatDateTime(item.timestamp)}</div>
+                                    </div>
+                                    <div>
+                                        <span class="response-status ${statusClass}">${item.response.status}</span>
+                                        <button class="btn btn-sm btn-danger history-delete">×</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        apiHistoryContainer.innerHTML = html;
+                        
+                        // Add click event to use request from history
+                        $$('#api-history .history-item').forEach(item => {
+                            item.addEventListener('click', async (e) => {
+                                if (!e.target.classList.contains('history-delete')) {
+                                    const historyId = item.getAttribute('data-id');
+                                    const historyItem = await fetchApi(`/api/dev/api/history/${historyId}`);
+                                    
+                                    if (historyItem && !historyItem.error) {
+                                        // Fill in the form with history item data
+                                        methodSelect.value = historyItem.method;
+                                        urlInput.value = historyItem.url;
+                                        
+                                        // Set headers
+                                        headersTable.innerHTML = '';
+                                        if (historyItem.headers && Object.keys(historyItem.headers).length > 0) {
+                                            Object.entries(historyItem.headers).forEach(([key, value]) => {
+                                                addHeaderRow(key, value);
+                                            });
+                                        } else {
+                                            addHeaderRow('', '');
+                                        }
+                                        
+                                        // Set body
+                                        requestBodyInput.value = historyItem.body || '';
+                                    }
+                                }
+                            });
+                        });
+                        
+                        // Add delete event
+                        $$('#api-history .history-delete').forEach(btn => {
+                            btn.addEventListener('click', async (e) => {
+                                e.stopPropagation();
+                                const historyId = btn.closest('.history-item').getAttribute('data-id');
+                                await fetchApi(`/api/dev/api/history/${historyId}`, { method: 'DELETE' });
+                                loadApiHistory();
+                            });
+                        });
+                    }
+                } catch (error) {
+                    console.error("Failed to load API history:", error);
+                } finally {
+                    apiLoadingSpinner.classList.add('hidden');
+                }
+            }
+
+            // Add header row to headers table
+            function addHeaderRow(key = '', value = '') {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="text" class="form-control" placeholder="Header Name" value="${escapeHtml(key)}"></td>
+                    <td><input type="text" class="form-control" placeholder="Header Value" value="${escapeHtml(value)}"></td>
+                    <td><span class="remove-row">&times;</span></td>
+                `;
+                
+                row.querySelector('.remove-row').addEventListener('click', () => {
+                    row.remove();
+                });
+                
+                headersTable.appendChild(row);
+            }
+
+            // Get headers from form
+            function getHeaders() {
+                const headers = {};
+                const rows = headersTable.querySelectorAll('tr');
+                
+                rows.forEach(row => {
+                    const inputs = row.querySelectorAll('input');
+                    const key = inputs[0].value.trim();
+                    const value = inputs[1].value.trim();
+                    
+                    if (key) {
+                        headers[key] = value;
+                    }
+                });
+                
+                return headers;
+            }
+
+            // Send API request
+            async function sendRequest() {
+                const method = methodSelect.value;
+                const url = urlInput.value.trim();
+                
+                if (!url) {
+                    alert("Please enter a URL");
+                    return;
+                }
+                
+                const headers = getHeaders();
+                const body = requestBodyInput.value;
+                
+                apiLoadingSpinner.classList.remove('hidden');
+                responseContainer.classList.add('hidden');
+                noResponseContainer.classList.remove('hidden');
+                
+                try {
+                    const response = await fetchApi('/api/dev/api/test', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ method, url, headers, body })
+                    });
+                    
+                    if (response.error) {
+                        // Show error
+                        responseStatus.textContent = `Error: ${response.error}`;
+                        responseStatus.className = 'response-status status-error';
+                        responseTime.textContent = '';
+                        responseBodyContent.textContent = response.error;
+                        responseHeadersContent.textContent = '';
+                    } else {
+                        // Update response status and time
+                        responseStatus.textContent = response.status;
+                        responseTime.textContent = `${Math.round(response.time)} ms`;
+                        
+                        // Set status class
+                        let statusClass = 'status-success';
+                        if (response.status >= 400) {
+                            statusClass = 'status-error';
+                        } else if (response.status >= 300) {
+                            statusClass = 'status-warning';
+                        }
+                        responseStatus.className = `response-status ${statusClass}`;
+                        
+                        // Format response body
+                        if (response.is_json) {
+                            responseBodyContent.innerHTML = `<pre class="response-json">${escapeHtml(formatJson(response.body))}</pre>`;
+                        } else {
+                            responseBodyContent.textContent = response.body;
+                        }
+                        
+                        // Format response headers
+                        let headersHtml = '';
+                        for (const [key, value] of Object.entries(response.headers)) {
+                            headersHtml += `<div><strong>${escapeHtml(key)}:</strong> ${escapeHtml(value)}</div>`;
+                        }
+                        responseHeadersContent.innerHTML = headersHtml;
+                    }
+                    
+                    // Show response container
+                    responseContainer.classList.remove('hidden');
+                    noResponseContainer.classList.add('hidden');
+                    
+                    // Refresh history
+                    loadApiHistory();
+                    
+                } catch (error) {
+                    console.error("Failed to send request:", error);
+                    responseStatus.textContent = `Error: ${error.message}`;
+                    responseStatus.className = 'response-status status-error';
+                    responseBodyContent.textContent = error.message;
+                    
+                    responseContainer.classList.remove('hidden');
+                    noResponseContainer.classList.add('hidden');
+                } finally {
+                    apiLoadingSpinner.classList.add('hidden');
+                }
+            }
+
+            // Clear API history
+            async function clearApiHistory() {
+                if (confirm("Are you sure you want to clear all API history?")) {
+                    // Delete each history item
+                    const items = $$('#api-history .history-item');
+                    for (const item of items) {
+                        const historyId = item.getAttribute('data-id');
+                        await fetchApi(`/api/dev/api/history/${historyId}`, { method: 'DELETE' });
+                    }
+                    
+                    // Refresh history
+                    loadApiHistory();
+                }
+            }
+
+            // Event listeners
+            addHeaderBtn.addEventListener('click', () => addHeaderRow());
+            sendRequestBtn.addEventListener('click', sendRequest);
+            clearApiHistoryBtn.addEventListener('click', clearApiHistory);
+            
+            // Handle remove header row
+            headersTable.addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-row')) {
+                    e.target.closest('tr').remove();
+                }
+            });
+            
+            // Initial load
+            loadApiHistory();
+        }
+
+        // Code Snippets
+        function setupCodeSnippets() {
+            const snippetItems = $('#snippet-items');
+            const newSnippetBtn = $('#new-snippet');
+            const createFirstSnippetBtn = $('#create-first-snippet');
+            const saveSnippetBtn = $('#save-snippet');
+            const deleteSnippetBtn = $('#delete-snippet');
+            const noSnippetSelected = $('#no-snippet-selected');
+            const snippetEditor = $('#snippet-editor');
+            const snippetTitleInput = $('#snippet-title');
+            const snippetLanguageSelect = $('#snippet-language');
+            const snippetDescriptionInput = $('#snippet-description');
+            const snippetTagsInput = $('#snippet-tags');
+            const codeEditor = $('#code-editor');
+            const snippetSearch = $('#snippet-search');
+            
+            let currentSnippetId = null;
+            let snippetsData = [];
+
+            // Load snippets
+            async function loadSnippets() {
+                try {
+                    const response = await fetchApi('/api/dev/snippets');
+                    
+                    if (response && response.snippets) {
+                        snippetsData = response.snippets;
+                        
+                        if (snippetsData.length === 0) {
+                            snippetItems.innerHTML = '<div class="no-snippets">No snippets yet. Create a new one to get started.</div>';
+                            return;
+                        }
+                        
+                        renderSnippetsList();
+                    }
+                } catch (error) {
+                    console.error("Failed to load snippets:", error);
+                    snippetItems.innerHTML = '<div class="error">Failed to load snippets</div>';
+                }
+            }
+
+            // Render snippets list
+            function renderSnippetsList(searchTerm = '') {
+                let filteredSnippets = snippetsData;
+                
+                // Filter by search term if provided
+                if (searchTerm) {
+                    const term = searchTerm.toLowerCase();
+                    filteredSnippets = snippetsData.filter(snippet => 
+                        snippet.title.toLowerCase().includes(term) || 
+                        snippet.description.toLowerCase().includes(term) ||
+                        snippet.tags.some(tag => tag.toLowerCase().includes(term))
+                    );
+                }
+                
+                if (filteredSnippets.length === 0) {
+                    snippetItems.innerHTML = '<div class="no-snippets">No matching snippets found.</div>';
+                    return;
+                }
+                
+                let html = '';
+                filteredSnippets.forEach(snippet => {
+                    const isActive = snippet.id === currentSnippetId ? 'active' : '';
+                    
+                    html += `
+                        <div class="snippet-item ${isActive}" data-id="${snippet.id}">
+                            <div class="snippet-item-title">${escapeHtml(snippet.title)}</div>
+                            <div class="snippet-item-info">
+                                <span>${snippet.language}</span>
+                                <span>${formatDateTime(snippet.updated_at)}</span>
+                            </div>
+                    `;
+                    
+                    if (snippet.tags.length > 0) {
+                        html += '<div class="snippet-tags">';
+                        snippet.tags.forEach(tag => {
+                            html += `<span class="snippet-tag">${escapeHtml(tag)}</span>`;
+                        });
+                        html += '</div>';
+                    }
+                    
+                    html += '</div>';
+                });
+                
+                snippetItems.innerHTML = html;
+                
+                // Add click event to select snippet
+                $$('.snippet-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const snippetId = item.getAttribute('data-id');
+                        selectSnippet(snippetId);
+                    });
+                });
+            }
+
+            // Create new snippet
+            async function createNewSnippet() {
+                // Reset form
+                snippetTitleInput.value = 'Untitled';
+                snippetLanguageSelect.value = 'text';
+                snippetDescriptionInput.value = '';
+                snippetTagsInput.value = '';
+                codeEditor.value = '';
+                
+                // Show editor, hide "no snippet selected" message
+                noSnippetSelected.classList.add('hidden');
+                snippetEditor.classList.remove('hidden');
+                
+                currentSnippetId = null;
+                
+                // Create the snippet on the server
+                try {
+                    const response = await fetchApi('/api/dev/snippets', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            title: 'Untitled',
+                            language: 'text',
+                            description: '',
+                            code: '',
+                            tags: []
+                        })
+                    });
+                    
+                    if (response && response.id) {
+                        currentSnippetId = response.id;
+                        
+                        // Refresh snippets list
+                        loadSnippets();
+                    }
+                } catch (error) {
+                    console.error("Failed to create snippet:", error);
+                    alert("Failed to create new snippet");
+                }
+            }
+
+            // Select snippet
+            async function selectSnippet(snippetId) {
+                if (currentSnippetId === snippetId) return;
+                
+                try {
+                    const response = await fetchApi(`/api/dev/snippets/${snippetId}`);
+                    
+                    if (response && response.id) {
+                        currentSnippetId = response.id;
+                        
+                        // Fill in form
+                        snippetTitleInput.value = response.title;
+                        snippetLanguageSelect.value = response.language;
+                        snippetDescriptionInput.value = response.description;
+                        snippetTagsInput.value = response.tags.join(', ');
+                        codeEditor.value = response.code;
+                        
+                        // Update active item in list
+                        $$('.snippet-item').forEach(item => {
+                            item.classList.remove('active');
+                            if (item.getAttribute('data-id') === snippetId) {
+                                item.classList.add('active');
+                            }
+                        });
+                        
+                        // Show editor, hide "no snippet selected" message
+                        noSnippetSelected.classList.add('hidden');
+                        snippetEditor.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error("Failed to load snippet:", error);
+                    alert("Failed to load snippet");
+                }
+            }
+
+            // Save snippet
+            async function saveSnippet() {
+                if (!currentSnippetId) return;
+                
+                const title = snippetTitleInput.value.trim() || 'Untitled';
+                const language = snippetLanguageSelect.value;
+                const description = snippetDescriptionInput.value.trim();
+                const tags = snippetTagsInput.value
+                    .split(',')
+                    .map(tag => tag.trim())
+                    .filter(tag => tag);
+                const code = codeEditor.value;
+                
+                try {
+                    const response = await fetchApi(`/api/dev/snippets/${currentSnippetId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            title,
+                            language,
+                            description,
+                            code,
+                            tags
+                        })
+                    });
+                    
+                    if (response && response.id) {
+                        // Refresh snippets list
+                        loadSnippets();
+                        alert("Snippet saved successfully");
+                    }
+                } catch (error) {
+                    console.error("Failed to save snippet:", error);
+                    alert("Failed to save snippet");
+                }
+            }
+
+            // Delete snippet
+            async function deleteSnippet() {
+                if (!currentSnippetId) return;
+                
+                if (confirm("Are you sure you want to delete this snippet?")) {
+                    try {
+                        const response = await fetchApi(`/api/dev/snippets/${currentSnippetId}`, {
+                            method: 'DELETE'
+                        });
+                        
+                        if (response && response.success) {
+                            // Reset current snippet
+                            currentSnippetId = null;
+                            
+                            // Show "no snippet selected" message, hide editor
+                            noSnippetSelected.classList.remove('hidden');
+                            snippetEditor.classList.add('hidden');
+                            
+                            // Refresh snippets list
+                            loadSnippets();
+                        }
+                    } catch (error) {
+                        console.error("Failed to delete snippet:", error);
+                        alert("Failed to delete snippet");
+                    }
+                }
+            }
+
+            // Search snippets
+            function searchSnippets() {
+                const searchTerm = snippetSearch.value.trim();
+                renderSnippetsList(searchTerm);
+            }
+
+            // Event listeners
+            newSnippetBtn.addEventListener('click', createNewSnippet);
+            createFirstSnippetBtn.addEventListener('click', createNewSnippet);
+            saveSnippetBtn.addEventListener('click', saveSnippet);
+            deleteSnippetBtn.addEventListener('click', deleteSnippet);
+            snippetSearch.addEventListener('input', searchSnippets);
+            
+            // Initial load
+            loadSnippets();
+        }
+
+        // Mock API for client-side testing (remove in production)
+        class MockAPI {
+            constructor() {
+                this.regexHistory = [];
+                this.apiHistory = [];
+                this.snippets = [];
+                this.snippetCounter = 1;
+                
+                // Load saved data from localStorage
+                this.loadFromStorage();
+            }
+            
+            loadFromStorage() {
+                try {
+                    const regexData = localStorage.getItem('dev_regex_history');
+                    if (regexData) this.regexHistory = JSON.parse(regexData);
+                    
+                    const apiData = localStorage.getItem('dev_api_history');
+                    if (apiData) this.apiHistory = JSON.parse(apiData);
+                    
+                    const snippetsData = localStorage.getItem('dev_snippets');
+                    if (snippetsData) this.snippets = JSON.parse(snippetsData);
+                    
+                    const counterData = localStorage.getItem('dev_snippet_counter');
+                    if (counterData) this.snippetCounter = parseInt(counterData, 10);
+                } catch (e) {
+                    console.error("Error loading from localStorage:", e);
+                }
+            }
+            
+            saveToStorage() {
+                try {
+                    localStorage.setItem('dev_regex_history', JSON.stringify(this.regexHistory));
+                    localStorage.setItem('dev_api_history', JSON.stringify(this.apiHistory));
+                    localStorage.setItem('dev_snippets', JSON.stringify(this.snippets));
+                    localStorage.setItem('dev_snippet_counter', this.snippetCounter.toString());
+                } catch (e) {
+                    console.error("Error saving to localStorage:", e);
+                }
+            }
+            
+            // Regex methods
+            async getRegexHistory() {
+                return { history: this.regexHistory };
+            }
+            
+            async testRegex(pattern, text, flags) {
+                try {
+                    const regex = new RegExp(pattern, flags);
+                    
+                    // Save to history
+                    const historyEntry = {
+                        id: Date.now().toString(),
+                        pattern,
+                        flags,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    this.regexHistory = [historyEntry, ...this.regexHistory.slice(0, 19)];
+                    this.saveToStorage();
+                    
+                    // Find matches
+                    const matches = [];
+                    let match;
+                    const globalRegex = new RegExp(pattern, flags + (flags.includes('g') ? '' : 'g'));
+                    
+                    while ((match = globalRegex.exec(text)) !== null) {
+                        const matchInfo = {
+                            value: match[0],
+                            start: match.index,
+                            end: match.index + match[0].length,
+                            groups: []
+                        };
+                        
+                        // Add captured groups
+                        for (let i = 1; i < match.length; i++) {
+                            matchInfo.groups.push({
+                                index: i,
+                                name: match.groups ? Object.keys(match.groups).find(key => match.groups[key] === match[i]) : null,
+                                value: match[i] || ''
+                            });
+                        }
+                        
+                        matches.push(matchInfo);
+                        
+                        // Prevent infinite loops with empty matches
+                        if (match[0] === '') {
+                            globalRegex.lastIndex++;
+                        }
+                    }
+                    
+                    return {
+                        is_valid: true,
+                        matches
+                    };
+                } catch (error) {
+                    return {
+                        is_valid: false,
+                        error: error.message,
+                        matches: []
+                    };
+                }
+            }
+            
+            async deleteRegexHistory(id) {
+                this.regexHistory = this.regexHistory.filter(item => item.id !== id);
+                this.saveToStorage();
+                return { success: true };
+            }
+            
+            // API methods
+            async getApiHistory() {
+                return { history: this.apiHistory };
+            }
+            
+            async getApiHistoryItem(id) {
+                const item = this.apiHistory.find(item => item.id === id);
+                return item || { error: 'Item not found' };
+            }
+            
+            async testApi(method, url, headers, body) {
+                try {
+                    const startTime = performance.now();
+                    
+                    // Prepare request options
+                    const options = {
+                        method,
+                        headers: headers || {}
+                    };
+                    
+                    if (['POST', 'PUT', 'PATCH'].includes(method) && body) {
+                        options.body = body;
+                    }
+                    
+                    // Make the request
+                    const response = await fetch(url, options);
+                    const endTime = performance.now();
+                    
+                    // Get response text
+                    const responseText = await response.text();
+                    
+                    // Check if response is JSON
+                    let responseBody = responseText;
+                    let isJson = false;
+                    
+                    try {
+                        responseBody = JSON.parse(responseText);
+                        isJson = true;
+                    } catch (e) {
+                        // Not JSON, keep as text
+                    }
+                    
+                    // Get response headers
+                    const responseHeaders = {};
+                    response.headers.forEach((value, key) => {
+                        responseHeaders[key] = value;
+                    });
+                    
+                    // Create history entry
+                    const historyEntry = {
+                        id: Date.now().toString(),
+                        method,
+                        url,
+                        headers,
+                        body,
+                        timestamp: new Date().toISOString(),
+                        response: {
+                            status: response.status,
+                            headers: responseHeaders,
+                            body: responseBody
+                        }
+                    };
+                    
+                    this.apiHistory = [historyEntry, ...this.apiHistory.slice(0, 19)];
+                    this.saveToStorage();
+                    
+                    return {
+                        status: response.status,
+                        headers: responseHeaders,
+                        body: responseBody,
+                        is_json: isJson,
+                        time: endTime - startTime
+                    };
+                } catch (error) {
+                    return {
+                        error: error.message
+                    };
+                }
+            }
+            
+            async deleteApiHistory(id) {
+                this.apiHistory = this.apiHistory.filter(item => item.id !== id);
+                this.saveToStorage();
+                return { success: true };
+            }
+            
+            // Snippets methods
+            async getSnippets() {
+                return { snippets: this.snippets };
+            }
+            
+            async getSnippet(id) {
+                const snippet = this.snippets.find(s => s.id === id);
+                return snippet || { error: 'Snippet not found' };
+            }
+            
+            async createSnippet(title, language, description, code, tags) {
+                const newSnippet = {
+                    id: this.snippetCounter.toString(),
+                    title: title || 'Untitled',
+                    language: language || 'text',
+                    description: description || '',
+                    code: code || '',
+                    tags: tags || [],
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                };
+                
+                this.snippets.unshift(newSnippet);
+                this.snippetCounter++;
+                this.saveToStorage();
+                
+                return newSnippet;
+            }
+            
+            async updateSnippet(id, title, language, description, code, tags) {
+                const index = this.snippets.findIndex(s => s.id === id);
+                
+                if (index === -1) {
+                    return { error: 'Snippet not found' };
+                }
+                
+                const updatedSnippet = {
+                    ...this.snippets[index],
+                    title: title || 'Untitled',
+                    language: language || 'text',
+                    description: description || '',
+                    code: code || '',
+                    tags: tags || [],
+                    updated_at: new Date().toISOString()
+                };
+                
+                this.snippets[index] = updatedSnippet;
+                this.saveToStorage();
+                
+                return updatedSnippet;
+            }
+            
+            async deleteSnippet(id) {
+                const initialLength = this.snippets.length;
+                this.snippets = this.snippets.filter(s => s.id !== id);
+                
+                if (this.snippets.length < initialLength) {
+                    this.saveToStorage();
+                    return { success: true };
+                } else {
+                    return { error: 'Snippet not found' };
+                }
+            }
+        }
+
+        // Setup mock API endpoints
+        async function setupMockAPI() {
+            const mockAPI = new MockAPI();
+            
+            // Override fetchApi function to use mock API
+            window.fetchApi = async (url, options = {}) => {
+                // Parse request
+                const method = options.method || 'GET';
+                let data = {};
+                
+                if (options.body) {
+                    try {
+                        data = JSON.parse(options.body);
+                    } catch (e) {
+                        console.error("Error parsing request body:", e);
+                    }
+                }
+                
+                // Simulate network delay
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                // Route request to appropriate mock handler
+                try {
+                    if (url === '/api/dev/regex/history') {
+                        return await mockAPI.getRegexHistory();
+                    } else if (url.startsWith('/api/dev/regex/history/')) {
+                        const id = url.split('/').pop();
+                        return await mockAPI.deleteRegexHistory(id);
+                    } else if (url === '/api/dev/regex/test') {
+                        return await mockAPI.testRegex(data.pattern, data.text, data.flags);
+                    } else if (url === '/api/dev/api/history') {
+                        return await mockAPI.getApiHistory();
+                    } else if (url.startsWith('/api/dev/api/history/')) {
+                        const id = url.split('/').pop();
+                        if (method === 'DELETE') {
+                            return await mockAPI.deleteApiHistory(id);
+                        } else {
+                            return await mockAPI.getApiHistoryItem(id);
+                        }
+                    } else if (url === '/api/dev/api/test') {
+                        return await mockAPI.testApi(data.method, data.url, data.headers, data.body);
+                    } else if (url === '/api/dev/snippets' && method === 'GET') {
+                        return await mockAPI.getSnippets();
+                    } else if (url === '/api/dev/snippets' && method === 'POST') {
+                        return await mockAPI.createSnippet(
+                            data.title, 
+                            data.language, 
+                            data.description, 
+                            data.code, 
+                            data.tags
+                        );
+                    } else if (url.startsWith('/api/dev/snippets/')) {
+                        const id = url.split('/').pop();
+                        
+                        if (method === 'GET') {
+                            return await mockAPI.getSnippet(id);
+                        } else if (method === 'PUT') {
+                            return await mockAPI.updateSnippet(
+                                id,
+                                data.title, 
+                                data.language, 
+                                data.description, 
+                                data.code, 
+                                data.tags
+                            );
+                        } else if (method === 'DELETE') {
+                            return await mockAPI.deleteSnippet(id);
+                        }
+                    }
+                    
+                    return { error: 'Endpoint not found' };
+                } catch (error) {
+                    console.error("Mock API error:", error);
+                    return { error: error.message };
+                }
+            };
+        }
+
+        // Initialize everything when the page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Setup mock API (remove in production)
+            await setupMockAPI();
+            
+            // Setup components
+            setupTabs();
+            setupRegexTester();
+            setupApiTools();
+            setupCodeSnippets();
+        });
+    </script>
+</body>
+</html>
+

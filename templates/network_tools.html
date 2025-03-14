@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Tools - PyITToolbox</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .footer {
+            margin-top: 50px;
+            padding: 20px 0;
+            background-color: #343a40;
+            color: white;
+        }
+        .tool-output {
+            background-color: #212529;
+            color: #fff;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-tools"></i> PyITToolbox
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="bi bi-house"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/network"><i class="bi bi-globe"></i> Network</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/system"><i class="bi bi-cpu"></i> System</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/security"><i class="bi bi-shield-lock"></i> Security</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/text"><i class="bi bi-file-text"></i> Text</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/web"><i class="bi bi-browser-chrome"></i> Web</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/file"><i class="bi bi-file-earmark"></i> File</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row mb-4">
+            <div class="col">
+                <h1><i class="bi bi-globe"></i> Network Tools</h1>
+                <p class="lead">Diagnostic and information tools for network analysis</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Ping Tool -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="bi bi-hdd-network"></i> Ping Tool</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="pingForm">
+                            <div class="mb-3">
+                                <label for="pingHost" class="form-label">Hostname or IP Address</label>
+                                <input type="text" class="form-control" id="pingHost" placeholder="e.g., google.com or 8.8.8.8">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Run Ping</button>
+                        </form>
+                        <div class="loader" id="pingLoader"></div>
+                        <div class="mt-3 tool-output" id="pingOutput" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Traceroute Tool -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="bi bi-diagram-3"></i> Traceroute</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="tracerouteForm">
+                            <div class="mb-3">
+                                <label for="tracerouteHost" class="form-label">Hostname or IP Address</label>
+                                <input type="text" class="form-control" id="tracerouteHost" placeholder="e.g., google.com or 8.8.8.8">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Run Traceroute</button>
+                        </form>
+                        <div class="loader" id="tracerouteLoader"></div>
+                        <div class="mt-3 tool-output" id="tracerouteOutput" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DNS Lookup Tool -->
+            <div class="col-md-6 mt-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="bi bi-search"></i> DNS Lookup</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="dnsLookupForm">
+                            <div class="mb-3">
+                                <label for="dnsDomain" class="form-label">Domain Name</label>
+                                <input type="text" class="form-control" id="dnsDomain" placeholder="e.g., google.com">
+                            </div>
+                            <div class="mb-3">
+                                <label for="dnsRecordType" class="form-label">Record Type</label>
+                                <select class="form-select" id="dnsRecordType">
+                                    <option value="A">A (IPv4 Address)</option>
+                                    <option value="AAAA">AAAA (IPv6 Address)</option>
+                                    <option value="MX">MX (Mail Exchange)</option>
+                                    <option value="NS">NS (Name Server)</option>
+                                    <option value="TXT">TXT (Text)</option>
+                                    <option value="CNAME">CNAME (Canonical Name)</option>
+                                    <option value="SOA">SOA (Start of Authority)</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Lookup DNS</button>
+                        </form>
+                        <div class="loader" id="dnsLookupLoader"></div>
+                        <div class="mt-3 tool-output" id="dnsLookupOutput" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Port Scanner Tool -->
+            <div class="col-md-6 mt-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="bi bi-grid-3x3-gap"></i> Port Scanner</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="portScanForm">
+                            <div class="mb-3">
+                                <label for="portScanHost" class="form-label">Hostname or IP Address</label>
+                                <input type="text" class="form-control" id="portScanHost" placeholder="e.g., scanme.nmap.org or 192.168.1.1">
+                            </div>
+                            <div class="mb-3">
+                                <label for="portRange" class="form-label">Port Range</label>
+                                <input type="text" class="form-control" id="portRange" placeholder="e.g., 1-100" value="1-100">
+                                <div class="form-text">For safety and performance reasons, limit to 1000 ports maximum.</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Scan Ports</button>
+                        </form>
+                        <div class="loader" id="portScanLoader"></div>
+                        <div class="mt-3 tool-output" id="portScanOutput" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WHOIS Lookup Tool -->
+            <div class="col-md-6 mt-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="bi bi-file-text"></i> WHOIS Lookup</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="whoisForm">
+                            <div class="mb-3">
+                                <label for="whoisDomain" class="form-label">Domain Name</label>
+                                <input type="text" class="form-control" id="whoisDomain" placeholder="e.g., google.com">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Lookup WHOIS</button>
+                        </form>
+                        <div class="loader" id="whoisLoader"></div>
+                        <div class="mt-3 tool-output" id="whoisOutput" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Local Network Info Tool -->
+            <div class="col-md-6 mt-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="bi bi-ethernet"></i> Local Network Info</h5>
+                    </div>
+                    <div class="card-body">
+                        <button id="localNetworkBtn" class="btn btn-primary">Get Network Info</button>
+                        <div class="loader" id="localNetworkLoader"></div>
+                        <div class="mt-3 tool-output" id="localNetworkOutput" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container text-center">
+            <p>PyITToolbox - Network Tools</p>
+            <p><small>© 2023 - Made with <i class="bi bi-heart-fill text-danger"></i> for IT Professionals</small></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Ping Tool
+        document.getElementById('pingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const hostname = document.getElementById('pingHost').value;
+            if (!hostname) {
+                alert('Please enter a hostname or IP address');
+                return;
+            }
+            
+            document.getElementById('pingOutput').style.display = 'none';
+            document.getElementById('pingLoader').style.display = 'block';
+            
+            fetch('/api/ping', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ hostname: hostname })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('pingLoader').style.display = 'none';
+                document.getElementById('pingOutput').style.display = 'block';
+                
+                if (data.error) {
+                    document.getElementById('pingOutput').innerText = 'Error: ' + data.error;
+                } else {
+                    document.getElementById('pingOutput').innerText = data.output;
+                }
+            })
+            .catch(error => {
+                document.getElementById('pingLoader').style.display = 'none';
+                document.getElementById('pingOutput').style.display = 'block';
+                document.getElementById('pingOutput').innerText = 'Error: ' + error;
+            });
+        });
+        
+        // Traceroute Tool
+        document.getElementById('tracerouteForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const hostname = document.getElementById('tracerouteHost').value;
+            if (!hostname) {
+                alert('Please enter a hostname or IP address');
+                return;
+            }
+            
+            document.getElementById('tracerouteOutput').style.display = 'none';
+            document.getElementById('tracerouteLoader').style.display = 'block';
+            
+            fetch('/api/traceroute', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ hostname: hostname })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('tracerouteLoader').style.display = 'none';
+                document.getElementById('tracerouteOutput').style.display = 'block';
+                
+                if (data.error) {
+                    document.getElementById('tracerouteOutput').innerText = 'Error: ' + data.error;
+                } else {
+                    document.getElementById('tracerouteOutput').innerText = data.output;
+                }
+            })
+            .catch(error => {
+                document.getElementById('tracerouteLoader').style.display = 'none';
+                document.getElementById('tracerouteOutput').style.display = 'block';
+                document.getElementById('tracerouteOutput').innerText = 'Error: ' + error;
+            });
+        });
+        
+        // DNS Lookup Tool
+        document.getElementById('dnsLookupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const domain = document.getElementById('dnsDomain').value;
+            const recordType = document.getElementById('dnsRecordType').value;
+            
+            if (!domain) {
+                alert('Please enter a domain name');
+                return;
+            }
+            
+            document.getElementById('dnsLookupOutput').style.display = 'none';
+            document.getElementById('dnsLookupLoader').style.display = 'block';
+            
+            fetch('/api/dns_lookup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ domain: domain, record_type: recordType })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('dnsLookupLoader').style.display = 'none';
+                document.getElementById('dnsLookupOutput').style.display = 'block';
+                
+                if (data.error) {
+                    document.getElementById('dnsLookupOutput').innerText = 'Error: ' + data.error;
+                } else {
+                    let output = `DNS ${recordType} records for ${domain}:\n\n`;
+                    data.results.forEach(result => {
+                        output += `${result}\n`;
+                    });
+                    document.getElementById('dnsLookupOutput').innerText = output;
+                }
+            })
+            .catch(error => {
+                document.getElementById('dnsLookupLoader').style.display = 'none';
+                document.getElementById('dnsLookupOutput').style.display = 'block';
+                document.getElementById('dnsLookupOutput').innerText = 'Error: ' + error;
+            });
+        });
+        
+        // Port Scanner Tool
+        document.getElementById('portScanForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const host = document.getElementById('portScanHost').value;
+            const portRange = document.getElementById('portRange').value;
+            
+            if (!host) {
+                alert('Please enter a hostname or IP address');
+                return;
+            }
+            
+            document.getElementById('portScanOutput').style.display = 'none';
+            document.getElementById('portScanLoader').style.display = 'block';
+            
+            fetch('/api/port_scan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ host: host, port_range: portRange })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('portScanLoader').style.display = 'none';
+                document.getElementById('portScanOutput').style.display = 'block';
+                
+                if (data.error) {
+                    document.getElementById('portScanOutput').innerText = 'Error: ' + data.error;
+                } else {
+                    let output = `Port scan results for ${host}:\n\n`;
+                    if (data.results.length === 0) {
+                        output += 'No open ports found in the specified range.';
+                    } else {
+                        output += 'PORT\tSTATUS\tSERVICE\n';
+                        output += '----\t------\t-------\n';
+                        data.results.forEach(result => {
+                            output += `${result.port}\topen\t${result.service}\n`;
+                        });
+                    }
+                    document.getElementById('portScanOutput').innerText = output;
+                }
+            })
+            .catch(error => {
+                document.getElementById('portScanLoader').style.display = 'none';
+                document.getElementById('portScanOutput').style.display = 'block';
+                document.getElementById('portScanOutput').innerText = 'Error: ' + error;
+            });
+        });
+        
+        // WHOIS Lookup Tool
+        document.getElementById('whoisForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const domain = document.getElementById('whoisDomain').value;
+            
+            if (!domain) {
+                alert('Please enter a domain name');
+                return;
+            }
+            
+            document.getElementById('whoisOutput').style.display = 'none';
+            document.getElementById('whoisLoader').style.display = 'block';
+            
+            fetch('/api/whois', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ domain: domain })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('whoisLoader').style.display = 'none';
+                document.getElementById('whoisOutput').style.display = 'block';
+                
+                if (data.error) {
+                    document.getElementById('whoisOutput').innerText = 'Error: ' + data.error;
+                } else {
+                    document.getElementById('whoisOutput').innerText = data.result;
+                }
+            })
+            .catch(error => {
+                document.getElementById('whoisLoader').style.display = 'none';
+                document.getElementById('whoisOutput').style.display = 'block';
+                document.getElementById('whoisOutput').innerText = 'Error: ' + error;
+            });
+        });
+        
+        // Local Network Info Tool
+        document.getElementById('localNetworkBtn').addEventListener('click', function() {
+            document.getElementById('localNetworkOutput').style.display = 'none';
+            document.getElementById('localNetworkLoader').style.display = 'block';
+            
+            fetch('/api/local_network')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('localNetworkLoader').style.display = 'none';
+                document.getElementById('localNetworkOutput').style.display = 'block';
+                
+                if (data.error) {
+                    document.getElementById('localNetworkOutput').innerText = 'Error: ' + data.error;
+                } else {
+                    let output = 'Local Network Interfaces:\n\n';
+                    data.interfaces.forEach(iface => {
+                        output += `Interface: ${iface.name}\n`;
+                        if (iface.addresses.length === 0) {
+                            output += '  No addresses assigned\n';
+                        } else {
+                            iface.addresses.forEach(addr => {
+                                if (addr.type === 'IPv4') {
+                                    output += `  IPv4: ${addr.addr}\n`;
+                                    output += `  Netmask: ${addr.netmask}\n`;
+                                } else if (addr.type === 'IPv6') {
+                                    output += `  IPv6: ${addr.addr}\n`;
+                                } else if (addr.type === 'MAC') {
+                                    output += `  MAC: ${addr.addr}\n`;
+                                }
+                            });
+                        }
+                        output += '\n';
+                    });
+                    document.getElementById('localNetworkOutput').innerText = output;
+                }
+            })
+            .catch(error => {
+                document.getElementById('localNetworkLoader').style.display = 'none';
+                document.getElementById('localNetworkOutput').style.display = 'block';
+                document.getElementById('localNetworkOutput').innerText = 'Error: ' + error;
+            });
+        });
+    </script>
+</body>
+</html>
+

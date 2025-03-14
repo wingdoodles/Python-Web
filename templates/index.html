@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyITToolbox - IT Tools Suite</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .tool-card {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        }
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .footer {
+            margin-top: 50px;
+            padding: 20px 0;
+            background-color: #343a40;
+            color: white;
+        }
+        .icon-large {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-tools"></i> PyITToolbox
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/"><i class="bi bi-house"></i> Home</a>
+                    </li>
+                    <!-- Dropdown for Tools -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-tools"></i> All Tools
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/network"><i class="bi bi-globe"></i> Network Tools</a></li>
+                            <li><a class="dropdown-item" href="/system"><i class="bi bi-cpu"></i> System Tools</a></li>
+                            <li><a class="dropdown-item" href="/security"><i class="bi bi-shield-lock"></i> Security Tools</a></li>
+                            <li><a class="dropdown-item" href="/text"><i class="bi bi-file-text"></i> Text Tools</a></li>
+                            <li><a class="dropdown-item" href="/web"><i class="bi bi-browser-chrome"></i> Web Tools</a></li>
+                            <li><a class="dropdown-item" href="/file"><i class="bi bi-file-earmark"></i> File Tools</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/database"><i class="bi bi-database"></i> Database Tools</a></li>
+                            <li><a class="dropdown-item" href="/logs"><i class="bi bi-journal-text"></i> Log Analysis</a></li>
+                            <li><a class="dropdown-item" href="/convert"><i class="bi bi-arrow-left-right"></i> Conversion Tools</a></li>
+                            <li><a class="dropdown-item" href="/monitor"><i class="bi bi-graph-up"></i> Monitoring</a></li>
+                            <li><a class="dropdown-item" href="/monitor2"><i class="bi bi-code-square"></i> Monitoring 2</a></li>
+                            <li><a class="dropdown-item" href="/dev"><i class="bi bi-code-square"></i> Development</a></li>
+                            <li><a class="dropdown-item" href="/infrastructure"><i class="bi bi-hdd-rack"></i> Infrastructure</a></li>
+                            <li><a class="dropdown-item" href="/backup"><i class="bi bi-cloud-arrow-up"></i> Backup & Recovery</a></li>
+                            <li><a class="dropdown-item" href="/collab"><i class="bi bi-people"></i> Collaboration</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://github.com/yourusername/pyittoolbox" target="_blank"><i class="bi bi-github"></i> GitHub</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row mb-4 text-center">
+            <div class="col">
+                <h1><i class="bi bi-tools"></i> PyITToolbox</h1>
+                <p class="lead">A comprehensive suite of IT tools in one Python application</p>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <!-- Core Tools Section -->
+            <div class="col-12">
+                <h2 class="mb-4">Core Tools</h2>
+            </div>
+            
+            <!-- Network Tools -->
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card h-100 tool-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-globe icon-large text-primary"></i>
+                        <h5 class="card-title">Network Tools</h5>
+                        <p class="card-text">IP tools, DNS queries, port scanners, and more.</p>
+                        <a href="/network" class="btn btn-primary">Open Tools</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- System Tools -->
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card h-100 tool-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-cpu icon-large text-success"></i>
+                        <h5 class="card-title">System Tools</h5>
+                        <p class="card-text">Process management, system info, and hardware details.</p>
+                        <a href="/system" class="btn btn-success">Open Tools</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Security Tools -->
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card h-100 tool-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-shield-lock icon-large text-danger"></i>
+                        <h5 class="card-title">Security Tools</h5>
+                        <p class="card-text">Password generators, hash tools, and encryption utilities.</p>
+                        <a href="/security" class="btn btn-danger">Open Tools</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Text Tools -->
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card h-100 tool-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-file-text icon-large text-info"></i>
+                        <h5 class="card-title">Text Tools</h5>
+                        <p class="card-text">Text transformation, formatting, and manipulation tools.</p>
+                        <a href="/text" class="btn btn-info">Open Tools</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Web Tools -->
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card h-100 tool-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-browser-chrome icon-large text-secondary"></i>
+                        <h5 class="card-title">Web Tools</h5>
+                        <p class="card-text">HTTP requests, URL parsing, and SSL certificate checking.</p>
+                        <a href="/web" class="btn btn-secondary">Open Tools</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- File Tools -->
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card h-100 tool-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-file-earmark icon-large text-dark"></i>
+                        <h5 class="card-title">File Tools</h5>
+                        <p class="card-text">File comparison, searching, and analysis utilities.</p>
+                        <a href="/file" class="btn btn-dark">Open Tools</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Tool Categories -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h2 class="mb-4">Advanced Tools</h2>
+            </div>
+            
+            <!-- Database Tools -->
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card h-100 tool-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-database icon-large text-primary"></i>
+                        <h5 class="card-title">Database Tools</h5>
+                        <p class="card-text">Database connection testing, SQL formatting, and schema visualization.</p>
+                        <a href="/database" class="btn btn-primary">Open Tools</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Log Analysis Tools -->
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card h-100 tool-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-journal-text icon-large text-success"></i>
+                        <h5 class="card-title">Log Analysis</h5>
+                        <p class="card-text">Log parsing, pattern finding, and visualization tools.</p>
+                        <a href="/logs" class="btn btn-success">Open Tools</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Conversion Tools -->
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card h-100 tool-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-arrow-left-right icon-large text-danger"></i>
+                        <h5 class="card-title">Conversion Tools</h5>
+                        <p class="card-text">Format converters, encoders/decoders, and unit converters.</p>
+                        <a href="/convert" class="btn btn-danger">Open Tools</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Monitoring Tools -->
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card h-100 tool-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-graph-up icon-large text-info"></i>
+                        <h5 class="card-title">Monitoring</h5>
+                        <p class="card-text">System resource monitor, process tracker, and task scheduler.</p>
+                        <a href="/monitor" class="btn btn-info">Open Tools</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Development Tools -->
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card h-100 tool-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-code-square icon-large text-secondary"></i>
+                        <h5 class="card-title">Development</h5>
+                        <p class="card-text">Regex tester, API tools, and code snippet management.</p>
+                        <a href="/dev" class="btn btn-secondary">Open Tools</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Infrastructure Tools -->
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card h-100 tool-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-hdd-rack icon-large text-dark"></i>
+                        <h5 class="card-title">Infrastructure</h5>
+                        <p class="card-text">Server management, network configuration, and deployment tools.</p>
+                        <a href="/infrastructure" class="btn btn-dark">Open Tools</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Backup & Recovery Tools -->
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card h-100 tool-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-cloud-arrow-up icon-large text-primary"></i>
+                        <h5 class="card-title">Backup & Recovery</h5>
+                        <p class="card-text">Data backup utilities, recovery tools, and disaster planning.</p>
+                        <a href="/backup" class="btn btn-primary">Open Tools</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Collaboration Tools -->
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card h-100 tool-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-people icon-large text-success"></i>
+                        <h5 class="card-title">Collaboration</h5>
+                        <p class="card-text">Team communication, project management, and file sharing tools.</p>
+                        <a href="/collab" class="btn btn-success">Open Tools</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Section -->
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h3>About PyITToolbox</h3>
+                    <p>PyITToolbox is an all-in-one IT toolkit designed to simplify the life of IT professionals, system administrators, developers, and security engineers. Built with Python and Flask, it provides a comprehensive set of utilities accessible from a single interface.</p>
+                    <p>This project is open source and contributions are welcome! Visit our <a href="https://github.com/wingdoodles/pyittoolbox" target="_blank">GitHub repository</a> to learn more.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container text-center">
+        <p>PyITToolbox - The Ultimate IT Professional's Toolkit</p>
+        <p><small>© 2023 - Made with <i class="bi bi-heart-fill text-danger"></i> for IT Professionals</small></p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

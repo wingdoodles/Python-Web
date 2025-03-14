@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Development Tools - System Monitoring</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .sidebar {
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            background-color: #f8f9fa;
+        }
+        .content {
+            padding: 20px;
+        }
+        .card-dashboard {
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        .card-dashboard:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .progress-bar-animated {
+            animation: progress-bar-stripes 1s linear infinite;
+        }
+        .gauge-container {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .table-scroll {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .refresh-status {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        /* Custom colors for status indicators */
+        .status-good { color: #28a745; }
+        .status-warning { color: #ffc107; }
+        .status-danger { color: #dc3545; }
+    </style>
+</head>
+<body>
+    <!-- Common Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-tools"></i> PyITToolbox
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="bi bi-house"></i> Home</a>
+                    </li>
+                    <!-- Dropdown for Tools -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-tools"></i> All Tools
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/network"><i class="bi bi-globe"></i> Network Tools</a></li>
+                            <li><a class="dropdown-item" href="/system"><i class="bi bi-cpu"></i> System Tools</a></li>
+                            <li><a class="dropdown-item" href="/security"><i class="bi bi-shield-lock"></i> Security Tools</a></li>
+                            <li><a class="dropdown-item" href="/text"><i class="bi bi-file-text"></i> Text Tools</a></li>
+                            <li><a class="dropdown-item" href="/web"><i class="bi bi-browser-chrome"></i> Web Tools</a></li>
+                            <li><a class="dropdown-item" href="/file"><i class="bi bi-file-earmark"></i> File Tools</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/database"><i class="bi bi-database"></i> Database Tools</a></li>
+                            <li><a class="dropdown-item" href="/logs"><i class="bi bi-journal-text"></i> Log Analysis</a></li>
+                            <li><a class="dropdown-item" href="/convert"><i class="bi bi-arrow-left-right"></i> Conversion Tools</a></li>
+                            <li><a class="dropdown-item" href="/monitor"><i class="bi bi-graph-up"></i> Monitoring</a></li>
+                            <li><a class="dropdown-item active" href="/monitor2"><i class="bi bi-code-square"></i> Monitoring 2</a></li>
+                            <li><a class="dropdown-item" href="/dev"><i class="bi bi-code-square"></i> Development</a></li>
+                            <li><a class="dropdown-item" href="/infrastructure"><i class="bi bi-hdd-rack"></i> Infrastructure</a></li>
+                            <li><a class="dropdown-item" href="/backup"><i class="bi bi-cloud-arrow-up"></i> Backup & Recovery</a></li>
+                            <li><a class="dropdown-item" href="/collab"><i class="bi bi-people"></i> Collaboration</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 px-0 sidebar d-md-block d-none">
+                <div class="p-3">
+                    <h5 class="fw-bold">System Monitoring</h5>
+                    <hr>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#system-section">
+                                <i class="bi bi-cpu"></i> System
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#disk-section">
+                                <i class="bi bi-hdd"></i> Disk
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#network-section">
+                                <i class="bi bi-broadcast-pin"></i> Network
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#application-section">
+                                <i class="bi bi-app"></i> Application
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#database-section">
+                                <i class="bi bi-database"></i> Database
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#logs-section">
+                                <i class="bi bi-journal-text"></i> Logs
+                            </a>
+                        </li>
+                    </ul>
+                    <hr>
+                    <div>
+                        <div class="refresh-status mb-2">Last update: <span id="last-refresh">Never</span></div>
+                        <div class="d-flex align-items-center">
+                            <div class="me-2">Auto-refresh:</div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="autoRefreshToggle" checked>
+                                <label class="form-check-label" for="autoRefreshToggle"></label>
+                            </div>
+                        </div>
+                        <select id="refreshInterval" class="form-select form-select-sm mt-2">
+                            <option value="5000">Every 5 seconds</option>
+                            <option value="10000" selected>Every 10 seconds</option>
+                            <option value="30000">Every 30 seconds</option>
+                            <option value="60000">Every minute</option>
+                        </select>
+                        <button id="refreshButton" class="btn btn-sm btn-primary mt-2 w-100">
+                            <i class="bi bi-arrow-repeat"></i> Refresh Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mobile Header -->
+            <div class="d-md-none bg-light p-3 w-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">System Monitoring</h5>
+                    <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">
+                        <i class="bi bi-list"></i> Menu
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Sidebar (Offcanvas) -->
+            <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title fw-bold">System Monitoring</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#system-section" data-bs-dismiss="offcanvas">
+                                <i class="bi bi-cpu"></i> System
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#disk-section" data-bs-dismiss="offcanvas">
+                                <i class="bi bi-hdd"></i> Disk
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#network-section" data-bs-dismiss="offcanvas">
+                                <i class="bi bi-broadcast-pin"></i> Network
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#application-section" data-bs-dismiss="offcanvas">
+                                <i class="bi bi-app"></i> Application
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#database-section" data-bs-dismiss="offcanvas">
+                                <i class="bi bi-database"></i> Database
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#logs-section" data-bs-dismiss="offcanvas">
+                                <i class="bi bi-journal-text"></i> Logs
+                            </a>
+                        </li>
+                    </ul>
+                    <hr>
+                    <div>
+                        <div class="refresh-status mb-2">Last update: <span id="mobile-last-refresh">Never</span></div>
+                        <div class="d-flex align-items-center">
+                            <div class="me-2">Auto-refresh:</div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="mobileAutoRefreshToggle" checked>
+                                <label class="form-check-label" for="mobileAutoRefreshToggle"></label>
+                            </div>
+                        </div>
+                        <select id="mobileRefreshInterval" class="form-select form-select-sm mt-2">
+                            <option value="5000">Every 5 seconds</option>
+                            <option value="10000" selected>Every 10 seconds</option>
+                            <option value="30000">Every 30 seconds</option>
+                            <option value="60000">Every minute</option>
+                        </select>
+                        <button id="mobileRefreshButton" class="btn btn-sm btn-primary mt-2 w-100">
+                            <i class="bi bi-arrow-repeat"></i> Refresh Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 content">
+                <div id="loading-indicator" class="alert alert-info text-center my-3">
+                    <div class="spinner-border spinner-border-sm me-2" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    Loading system information...
+                </div>
+                
+                <div id="dashboard-content" style="display: none;">
+                    <!-- System Section -->
+                    <section id="system-section">
+                        <h2 class="mb-4">System Overview</h2>
+                        <div class="row">
+                            <!-- System Info Card -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card card-dashboard h-100">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="card-title mb-0">
+                                            <i class="bi bi-info-circle me-2"></i> System Information
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-hover">
+                                                <tbody id="system-info-table">
+                                                    <tr><td colspan="2" class="text-center">Loading...</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- CPU Card -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card card-dashboard h-100">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="card-title mb-0">
+                                            <i class="bi bi-cpu me-2"></i> CPU Usage
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="gauge-container mb-4" id="cpu-gauge"></div>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-hover">
+                                                <tbody id="cpu-info-table">
+                                                    <tr><td colspan="2" class="text-center">Loading...</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Memory Card -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card card-dashboard h-100">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h5 class="card-title mb-0">
+                                            <i class="bi bi-memory me-2"></i> Memory Usage
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6>RAM Usage</h6>
+                                        <div class="progress mb-2" style="height: 25px;">
+                                            <div id="ram-usage-bar" class="progress-bar progress-bar-striped" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                                        </div>
+                                        <p id="ram-usage-text" class="text-muted">Loading...</p>
+                                        
+                                        <h6 class="mt-4">Swap Usage</h6>
+                                        <div class="progress mb-2" style="height: 25px;">
+                                            <div id="swap-usage-bar" class="progress-bar progress-bar-striped bg-info" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                                        </div>
+                                        <p id="swap-usage-text" class="text-muted">Loading...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Processes Card -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card card-dashboard">
+                                    <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                                        <h5 class="card-title mb-0">
+                                            <i class="bi bi-list-task me-2"></i> Running Processes
+                                        </h5>
+                                        <input type="text" id="processSearchInput" class="form-control form-control-sm w-auto" placeholder="Search processes...">
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive table-scroll">
+                                            <table class="table table-hover table-sm mb-0">
+                                                <thead class="table-light sticky-top">
+                                                    <tr>
+                                                        <th>PID</th>
+                                                        <th>Name</th>
+                                                        <th>User</th>
+                                                        <th>Status</th>
+                                                        <th>CPU %</th>
+                                                        <th>Memory %</th>
+                                                        <th>Memory</th>
+                                                        <th>Created</th>
+                                                        <th>Threads</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="processes-table">
+                                                    <tr><td colspan="9" class="text-center">Loading processes...</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- Disk Section -->
+                    <section id="disk-section" class="mt-5">
+                        <h2 class="mb-4">Disk Storage</h2>
+                        <div class="row" id="disk-partitions">
+                            <!-- Disk partitions will be added here dynamically -->
+                            <div class="col-12">
+                                <div class="alert alert-info text-center">
+                                    Loading disk information...
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- IO Statistics -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card card-dashboard">
+                                    <div class="card-header bg-info text-white">
+                                        <h5 class="card-title mb-0">
+                                            <i class="bi bi-arrow-down-up me-2"></i> Disk I/O Statistics
+                                        </h5>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover table-sm mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Device</th>
+                                                        <th>Read Count</th>
+                                                        <th>Write Count</th>
+                                                        <th>Read Bytes</th>
+                                                        <th>Write Bytes</th>
+                                                        <th>Read Time</th>
+                                                        <th>Write Time</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="disk-io-table">
+                                                    <tr><td colspan="7" class="text-center">Loading disk I/O stats...</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- Network Section -->
+                    <section id="network-section" class="mt-5">
+                        <h2 class="mb-4">Network</h2>
+                        
+                        <!-- Network Interfaces -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card card-dashboard">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="card-title mb-0">
+                                            <i class="bi bi-ethernet me-2"></i> Network Interfaces
+                                        </h5>
+                                    </div>
+                                    <div class="card-body" id="network-interfaces">
+                                        <div class="alert alert-info text-center">
+                                            Loading network interfaces...
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Network Traffic -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="card card-dashboard">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="card-title mb-0">
+                                            <i class="bi bi-graph-up me-2"></i> Network Traffic
+                                        </h5>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover table-sm mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Interface</th>
+                                                        <th>Bytes Sent</th>
+                                                        <th>Bytes Received</th>
+                                                        <th>Packets Sent</th>
+                                                        <th>Packets Received</th>
+                                                        <th>Errors In/Out</th>
+                                                        <th>Dropped In/Out</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="network-traffic-table">
+                                                    <tr><td colspan="7" class="text-center">Loading network traffic...</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Network Connections -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card card-dashboard">
+                                    <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                                        <h5 class="card-title mb-0">
+                                            <i class="bi bi-diagram-3 me-2"></i> Network Connections
+                                        </h5>
+                                        <input type="text" id="connectionSearchInput" class="form-control form-control-sm w-auto" placeholder="Search connections...">
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive table-scroll">
+                                            <table class="table table-hover table-sm mb-0">
+                                                <thead class="table-light sticky-top">
+                                                    <tr>
+                                                        <th>Process</th>
+                                                        <th>PID</th>
+                                                        <th>Type</th>
+                                                        <th>Local Address</th>
+                                                        <th>Remote Address</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="connections-table">
+                                                    <tr><td colspan="6" class="text-center">Loading connections...</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- Application Section -->
+                    <section id="application-section" class="mt-5">
+                        <h2 class="mb-4">Application</h2>
+                        
+                        <!-- App Info -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card card-dashboard h-100">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="card-title mb-0">
+                                            <i class="bi bi-info-circle me-2"></i> Application Information
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-hover">
+                                                <tbody id="app-info-table">
+                                                    <tr><td colspan="2" class="text-center">Loading application info...</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card card-dashboard h-100">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="card-title mb-0">
+                                            <i class="bi bi-people me-2"></i> User Statistics
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="user-stats">
+                                            <div class="alert alert-info text-center">
+                                                Loading user statistics...
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Routes & Requests -->
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="card card-dashboard h-100">
+                                    <div class="card-header bg-info text-white">
+                                        <h5 class="card-title mb-0">
+                                            <i class="bi bi-signpost-split me-2"></i> Routes
+                                        </h5>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive table-scroll">
+                                            <table class="table table-hover table-sm mb-0">
+                                                <thead class="table-light sticky-top">
+                                                    <tr>
+                                                        <th>Path</th>
+                                                        <th>Endpoint</th>
+                                                        <th>Methods</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="routes-table">
+                                                    <tr><td colspan="3" class="text-center">Loading routes...</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-4">
+                                <div class="card card-dashboard h-100">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h5 class="card-title mb-0">
+                                            <i class="bi bi-arrow-repeat me-2"></i> Request Statistics
+                                        </h5>
+                                    </div>
+                                    <div class="card-body" id="request-stats">
+                                        <div class="alert alert-info text-center">
+                                            Loading request statistics...
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- Database Section -->
+                    <section id="database-section" class="mt-5">
+                        <h2 class="mb-4">Database</h2>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card card-dashboard">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="card-title mb-0">
+                                            <i class="bi bi-database me-2"></i> Database Status
+                                        </h5>
+                                    </div>
+                                    <div class="card-body" id="database-status">
+                                        <div class="alert alert-info">
+                                            Database monitoring is not available or configured.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- Logs Section -->
+                    <section id="logs-section" class="mt-5">
+                        <h2 class="mb-4">Logs</h2>
+                        
+                        <ul class="nav nav-tabs mb-3" id="logsTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="error-logs-tab" data-bs-toggle="tab" data-bs-target="#error-logs" type="button" role="tab" aria-controls="error-logs" aria-selected="true">
+                                    <i class="bi bi-exclamation-triangle me-1"></i> Error Logs
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="access-logs-tab" data-bs-toggle="tab" data-bs-target="#access-logs" type="button" role="tab" aria-controls="access-logs" aria-selected="false">
+                                    <i class="bi bi-file-text me-1"></i> Access Logs
+                                </button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content" id="logsTabContent">
+                            <!-- Error Logs -->
+                            <div class="tab-pane fade show active" id="error-logs" role="tabpanel" aria-labelledby="error-logs-tab">
+                                <div class="card card-dashboard">
+                                    <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                                        <h5 class="card-title mb-0">
+                                            <i class="bi bi-bug me-2"></i> Error Logs
+                                        </h5>
+                                        <div class="d-flex">
+                                            <input type="text" id="errorLogSearchInput" class="form-control form-control-sm me-2" placeholder="Search errors...">
+                                            <select id="errorLogPage" class="form-select form-select-sm" style="width: auto;">
+                                                <option value="1">Page 1</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive table-scroll">
+                                            <table class="table table-hover table-sm mb-0">
+                                                <thead class="table-light sticky-top">
+                                                    <tr>
+                                                        <th>Timestamp</th>
+                                                        <th>Level</th>
+                                                        <th>Message</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="error-logs-table">
+                                                    <tr><td colspan="3" class="text-center">Loading error logs...</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Access Logs -->
+                            <div class="tab-pane fade" id="access-logs" role="tabpanel" aria-labelledby="access-logs-tab">
+                                <div class="card card-dashboard">
+                                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                                        <h5 class="card-title mb-0">
+                                            <i class="bi bi-file-text me-2"></i> Access Logs
+                                        </h5>
+                                        <div class="d-flex">
+                                            <input type="text" id="accessLogSearchInput" class="form-control form-control-sm me-2" placeholder="Search access logs...">
+                                            <select id="accessLogPage" class="form-select form-select-sm" style="width: auto;">
+                                                <option value="1">Page 1</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive table-scroll">
+                                            <table class="table table-hover table-sm mb-0">
+                                                <thead class="table-light sticky-top">
+                                                    <tr>
+                                                        <th>Timestamp</th>
+                                                        <th>IP</th>
+                                                        <th>Method</th>
+                                                        <th>Path</th>
+                                                        <th>Status</th>
+                                                        <th>User Agent</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="access-logs-table">
+                                                    <tr><td colspan="6" class="text-center">Loading access logs...</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gauge-chart@0.5.3/dist/bundle.js"></script>
+    
+    <!-- Dashboard JavaScript -->
+    <script>
+        // Global variables
+        let refreshTimer;
+        let isAutoRefreshEnabled = true;
+        let refreshInterval = 10000; // Default 10 seconds
+        let lastRefreshTime = null;
+        
+        // Initialize the dashboard when document is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Load all dashboard data
+            refreshAllData();
+            
+            // Start auto-refresh
+            startAutoRefresh();
+        });
+        
+        // Set up all event listeners
+        function setupEventListeners() {
+            // Refresh button
+            document.getElementById('refreshButton').addEventListener('click', function() {
+                refreshAllData();
+            });
+            
+            document.getElementById('mobileRefreshButton').addEventListener('click', function() {
+                refreshAllData();
+            });
+            
+            // Auto-refresh toggle
+            document.getElementById('autoRefreshToggle').addEventListener('change', function() {
+                isAutoRefreshEnabled = this.checked;
+                document.getElementById('mobileAutoRefreshToggle').checked = this.checked;
+                
+                if (isAutoRefreshEnabled) {
+                    startAutoRefresh();
+                } else {
+                    stopAutoRefresh();
+                }
+            });
+            
+            document.getElementById('mobileAutoRefreshToggle').addEventListener('change', function() {
+                isAutoRefreshEnabled = this.checked;
+                document.getElementById('autoRefreshToggle').checked = this.checked;
+                
+                if (isAutoRefreshEnabled) {
+                    startAutoRefresh();
+                } else {
+                    stopAutoRefresh();
+                }
+            });
+            
+            // Refresh interval select
+            document.getElementById('refreshInterval').addEventListener('change', function() {
+                refreshInterval = parseInt(this.value);
+                document.getElementById('mobileRefreshInterval').value = this.value;
+                
+                if (isAutoRefreshEnabled) {
+                    restartAutoRefresh();
+                }
+            });
+            
+            document.getElementById('mobileRefreshInterval').addEventListener('change', function() {
+                refreshInterval = parseInt(this.value);
+                document.getElementById('refreshInterval').value = this.value;
+                
+                if (isAutoRefreshEnabled) {
+                    restartAutoRefresh();
+                }
+            });
+            
+            // Search functionality for processes
+            document.getElementById('processSearchInput').addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const rows = document.querySelectorAll('#processes-table tr:not(.no-data)');
+                
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+            
+            // Search functionality for connections
+            document.getElementById('connectionSearchInput').addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const rows = document.querySelectorAll('#connections-table tr:not(.no-data)');
+                
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+            
+            // Search and pagination for logs
+            document.getElementById('errorLogSearchInput').addEventListener('input', function() {
+                fetchErrorLogs(1, this.value);
+            });
+            
+            document.getElementById('accessLogSearchInput').addEventListener('input', function() {
+                fetchAccessLogs(1, this.value);
+            });
+            
+            document.getElementById('errorLogPage').addEventListener('change', function() {
+                const page = parseInt(this.value);
+                const search = document.getElementById('errorLogSearchInput').value;
+                fetchErrorLogs(page, search);
+            });
+            
+            document.getElementById('accessLogPage').addEventListener('change', function() {
+                const page = parseInt(this.value);
+                const search = document.getElementById('accessLogSearchInput').value;
+                fetchAccessLogs(page, search);
+            });
+        }
+        
+        // Start auto-refresh timer
+        function startAutoRefresh() {
+            if (refreshTimer) {
+                clearInterval(refreshTimer);
+            }
+            
+            refreshTimer = setInterval(refreshAllData, refreshInterval);
+        }
+        
+        // Stop auto-refresh timer
+        function stopAutoRefresh() {
+            if (refreshTimer) {
+                clearInterval(refreshTimer);
+                refreshTimer = null;
+            }
+        }
+        
+        // Restart auto-refresh timer with new interval
+        function restartAutoRefresh() {
+            stopAutoRefresh();
+            startAutoRefresh();
+        }
+        
+        // Refresh all dashboard data
+        function refreshAllData() {
+            // Show loading indicator if this is the first load
+            if (!lastRefreshTime) {
+                document.getElementById('loading-indicator').style.display = 'block';
+                document.getElementById('dashboard-content').style.display = 'none';
+            }
+            
+            // Fetch all data
+            fetchSystemInfo();
+            fetchCpuInfo();
+            fetchMemoryInfo();
+            fetchProcesses();
+            fetchDiskInfo();
+            fetchDiskIO();
+            fetchNetworkInterfaces();
+            fetchNetworkTraffic();
+            fetchNetworkConnections();
+            fetchAppInfo();
+            fetchRoutes();
+            fetchRequestStats();
+            fetchErrorLogs();
+            fetchAccessLogs();
+            
+            // Update refresh time
+            lastRefreshTime = new Date();
+            document.getElementById('last-refresh').textContent = lastRefreshTime.toLocaleTimeString();
+            document.getElementById('mobile-last-refresh').textContent = lastRefreshTime.toLocaleTimeString();
+            
+            // Hide loading indicator and show content on first load
+            if (document.getElementById('loading-indicator').style.display === 'block') {
+                setTimeout(() => {
+                    document.getElementById('loading-indicator').style.display = 'none';
+                    document.getElementById('dashboard-content').style.display = 'block';
+                }, 1000);
+            }
+        }
+        
+        // Fetch system information
+        function fetchSystemInfo() {
+            fetch('/api/monitoring/system/info')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showError('system-info-table', data.error);
+                        return;
+                    }
+                    
+                    const tableBody = document.getElementById('system-info-table');
+                    tableBody.innerHTML = '';
+                    
+                    // Create table rows
+                    const rows = [
+                        { label: 'Hostname', value: data.hostname },
+                        { label: 'OS', value: `${data.system} ${data.release}` },
+                        { label: 'Architecture', value: data.architecture },
+                        { label: 'Processor', value: data.processor },
+                        { label: 'Python Version', value: data.python_version },
+                        { label: 'Uptime', value: data.uptime },
+                        { label: 'Boot Time', value: data.boot_time }
+                    ];
+                    
+                    rows.forEach(row => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td><strong>${row.label}:</strong></td>
+                            <td>${row.value}</td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                })
+                .catch(error => {
+                    showError('system-info-table', error);
+                });
+        }
+        
+        // Fetch CPU information
+        function fetchCpuInfo() {
+            fetch('/api/monitoring/system/cpu')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showError('cpu-info-table', data.error);
+                        return;
+                    }
+                    
+                    // Update CPU gauge
+                    updateCpuGauge(data.percent);
+                    
+                    // Update CPU info table
+                    const tableBody = document.getElementById('cpu-info-table');
+                    tableBody.innerHTML = '';
+                    
+                    // Create table rows
+                    const rows = [
+                        { label: 'CPU Usage', value: `${data.percent.toFixed(1)}%` },
+                        { label: 'Logical CPUs', value: data.logical_count },
+                        { label: 'Physical CPUs', value: data.physical_count || 'N/A' },
+                        { label: 'Current Frequency', value: data.freq.current ? `${data.freq.current} MHz` : 'N/A' },
+                        { label: 'Min Frequency', value: data.freq.min ? `${data.freq.min} MHz` : 'N/A' },
+                        { label: 'Max Frequency', value: data.freq.max ? `${data.freq.max} MHz` : 'N/A' },
+                        { label: 'Load Avg (1m)', value: data.load_avg[0].toFixed(2) },
+                        { label: 'Load Avg (5m)', value: data.load_avg[1].toFixed(2) },
+                        { label: 'Load Avg (15m)', value: data.load_avg[2].toFixed(2) }
+                    ];
+                    
+                    rows.forEach(row => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td><strong>${row.label}:</strong></td>
+                            <td>${row.value}</td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                })
+                .catch(error => {
+                    showError('cpu-info-table', error);
+                });
+        }
+        
+        // Update CPU gauge visualization
+        function updateCpuGauge(cpuPercent) {
+            const gaugeElement = document.getElementById('cpu-gauge');
+            gaugeElement.innerHTML = '';
+            
+            // Determine color based on CPU usage
+            let color = '#28a745'; // green
+            if (cpuPercent > 85) {
+                color = '#dc3545'; // red
+            } else if (cpuPercent > 60) {
+                color = '#ffc107'; // yellow
+            }
+            
+            // Create gauge
+            const gauge = GaugeChart.gaugeChart(gaugeElement, {
+                size: 150,
+                arcLineWidth: 15,
+                arcColors: ['#e6e6e6', color],
+                arcDelimiters: [cpuPercent],
+                rangeLabel: ['0', '100%'],
+                centralLabel: `${cpuPercent}%`
+            });
+        }
+        
+        // Fetch memory information
+        function fetchMemoryInfo() {
+            fetch('/api/monitoring/system/memory')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showError('ram-usage-text', data.error);
+                        return;
+                    }
+                    
+                    // Update RAM usage
+                    const ramPercent = data.percent;
+                    const ramBar = document.getElementById('ram-usage-bar');
+                    ramBar.style.width = `${ramPercent}%`;
+                    ramBar.textContent = `${ramPercent.toFixed(1)}%`;
+                    
+                    // Set color based on usage percentage
+                    if (ramPercent > 85) {
+                        ramBar.className = 'progress-bar progress-bar-striped bg-danger';
+                    } else if (ramPercent > 60) {
+                        ramBar.className = 'progress-bar progress-bar-striped bg-warning';
+                    } else {
+                        ramBar.className = 'progress-bar progress-bar-striped bg-success';
+                    }
+                    
+                    // Update RAM text
+                    document.getElementById('ram-usage-text').textContent = 
+                        `${data.used_formatted} used of ${data.total_formatted} (${data.available_formatted} available)`;
+                    
+                    // Update Swap usage
+                    if (data.swap.total > 0) {
+                        const swapPercent = data.swap.percent;
+                        const swapBar = document.getElementById('swap-usage-bar');
+                        swapBar.style.width = `${swapPercent}%`;
+                        swapBar.textContent = `${swapPercent.toFixed(1)}%`;
+                        
+                        // Set color based on usage percentage
+                        if (swapPercent > 85) {
+                            swapBar.className = 'progress-bar progress-bar-striped bg-danger';
+                        } else if (swapPercent > 60) {
+                            swapBar.className = 'progress-bar progress-bar-striped bg-warning';
+                        } else {
+                            swapBar.className = 'progress-bar progress-bar-striped bg-info';
+                        }
+                        
+                        // Update Swap text
+                        document.getElementById('swap-usage-text').textContent = 
+                            `${data.swap.used_formatted} used of ${data.swap.total_formatted}`;
+                    } else {
+                        // No swap
+                        const swapBar = document.getElementById('swap-usage-bar');
+                        swapBar.style.width = '0%';
+                        swapBar.textContent = 'N/A';
+                        document.getElementById('swap-usage-text').textContent = 'No swap memory configured';
+                    }
+                })
+                .catch(error => {
+                    showError('ram-usage-text', error);
+                });
+        }
+        
+        // Fetch processes list
+        function fetchProcesses() {
+            fetch('/api/monitoring/processes')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showError('processes-table', data.error);
+                        return;
+                    }
+                    
+                    const tableBody = document.getElementById('processes-table');
+                    tableBody.innerHTML = '';
+                    
+                    if (!data.processes || data.processes.length === 0) {
+                        showNoData('processes-table', 'No processes found');
+                        return;
+                    }
+                    
+                    // Sort processes by CPU usage (descending)
+                    data.processes.sort((a, b) => b.cpu_percent - a.cpu_percent);
+                    
+                    // Add processes to the table
+                    data.processes.forEach(process => {
+                        const tr = document.createElement('tr');
+                        
+                        // Determine status color
+                        let statusClass = '';
+                        if (process.status === 'running') {
+                            statusClass = 'status-good';
+                        } else if (process.status === 'sleeping') {
+                            statusClass = 'text-muted';
+                        } else if (['stopped', 'zombie'].includes(process.status)) {
+                            statusClass = 'status-danger';
+                        }
+                        
+                        tr.innerHTML = `
+                            <td>${process.pid}</td>
+                            <td>${process.name}</td>
+                            <td>${process.username}</td>
+                            <td><span class="${statusClass}">${process.status}</span></td>
+                            <td>${process.cpu_percent.toFixed(1)}%</td>
+                            <td>${process.memory_percent.toFixed(1)}%</td>
+                            <td>${process.memory_info.rss_formatted}</td>
+                            <td>${process.create_time}</td>
+                            <td>${process.num_threads}</td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                })
+                .catch(error => {
+                    showError('processes-table', error);
+                });
+        }
+        
+        // Fetch disk information
+        function fetchDiskInfo() {
+            fetch('/api/monitoring/disk/partitions')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showError('disk-partitions', data.error);
+                        return;
+                    }
+                    
+                    const container = document.getElementById('disk-partitions');
+                    container.innerHTML = '';
+                    
+                    if (!data.partitions || data.partitions.length === 0) {
+                        showNoData('disk-partitions', 'No disk partitions found');
+                        return;
+                    }
+                    
+                    // Create a card for each disk partition
+                    data.partitions.forEach(partition => {
+                        const percent = partition.percent;
+                        
+                        // Determine color based on disk usage
+                        let colorClass = 'bg-success';
+                        if (percent > 85) {
+                            colorClass = 'bg-danger';
+                        } else if (percent > 70) {
+                            colorClass = 'bg-warning';
+                        }
+                        
+                        const col = document.createElement('div');
+                        col.className = 'col-md-6 col-lg-4 mb-4';
+                        col.innerHTML = `
+                            <div class="card card-dashboard h-100">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="card-title mb-0">
+                                        <i class="bi bi-hdd me-2"></i> ${partition.device}
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Mount Point:</strong> ${partition.mountpoint}</p>
+                                    <p><strong>File System:</strong> ${partition.fstype}</p>
+                                    <p><strong>Options:</strong> ${partition.opts}</p>
+                                    <div class="progress mb-2" style="height: 25px;">
+                                        <div class="progress-bar progress-bar-striped ${colorClass}" 
+                                             style="width: ${percent}%">${percent}%</div>
+                                    </div>
+                                    <p>${partition.used_formatted} used of ${partition.total_formatted} 
+                                       (${partition.free_formatted} free)</p>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(col);
+                    });
+                })
+                .catch(error => {
+                    showError('disk-partitions', error);
+                });
+        }
+        
+        // Fetch disk I/O statistics
+        function fetchDiskIO() {
+            fetch('/api/monitoring/disk/io')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showError('disk-io-table', data.error);
+                        return;
+                    }
+                    
+                    const tableBody = document.getElementById('disk-io-table');
+                    tableBody.innerHTML = '';
+                    
+                    if (!data.io_counters || Object.keys(data.io_counters).length === 0) {
+                        showNoData('disk-io-table', 'No disk I/O information available');
+                        return;
+                    }
+                    
+                    // Add data for each disk
+                    Object.keys(data.io_counters).forEach(disk => {
+                        const io = data.io_counters[disk];
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${disk}</td>
+                            <td>${io.read_count}</td>
+                            <td>${io.write_count}</td>
+                            <td>${io.read_bytes_formatted}</td>
+                            <td>${io.write_bytes_formatted}</td>
+                            <td>${io.read_time} ms</td>
+                            <td>${io.write_time} ms</td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                })
+                .catch(error => {
+                    showError('disk-io-table', error);
+                });
+        }
+        
+        // Fetch network interfaces
+        function fetchNetworkInterfaces() {
+            fetch('/api/monitoring/network/interfaces')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showError('network-interfaces', data.error);
+                        return;
+                    }
+                    
+                    const container = document.getElementById('network-interfaces');
+                    container.innerHTML = '';
+                    
+                    if (!data.interfaces || Object.keys(data.interfaces).length === 0) {
+                        showNoData('network-interfaces', 'No network interfaces found');
+                        return;
+                    }
+                    
+                    // Add default gateway information
+                    const gatewayDiv = document.createElement('div');
+                    gatewayDiv.className = 'alert alert-info mb-4';
+                    gatewayDiv.innerHTML = `
+                        <strong>Default Gateway:</strong> ${data.default_gateway.gateway} 
+                        (${data.default_gateway.interface})
+                    `;
+                    container.appendChild(gatewayDiv);
+                    
+                    // Create interface cards
+                    const row = document.createElement('div');
+                    row.className = 'row';
+                    
+                    Object.keys(data.interfaces).forEach(name => {
+                        const iface = data.interfaces[name];
+                        const statusClass = iface.is_up ? 'status-good' : 'status-danger';
+                        const statusIcon = iface.is_up ? 'check-circle-fill' : 'x-circle-fill';
+                        
+                        const col = document.createElement('div');
+                        col.className = 'col-md-6 mb-4';
+                        
+                        let addressesHtml = '';
+                        iface.addresses.forEach(addr => {
+                            addressesHtml += `
+                                <div class="mb-2">
+                                    <span class="badge bg-secondary">${addr.family_name}</span> ${addr.address}
+                                    ${addr.netmask ? `<div class="text-muted small">Netmask: ${addr.netmask}</div>` : ''}
+                                    ${addr.broadcast ? `<div class="text-muted small">Broadcast: ${addr.broadcast}</div>` : ''}
+                                </div>
+                            `;
+                        });
+                        
+                        col.innerHTML = `
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">${name}</h5>
+                                    <span class="${statusClass}">
+                                        <i class="bi bi-${statusIcon}"></i> ${iface.is_up ? 'Up' : 'Down'}
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <h6>Addresses:</h6>
+                                    ${addressesHtml || '<p class="text-muted">No addresses</p>'}
+                                    
+                                    <h6 class="mt-3">Interface Stats:</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <td>MTU:</td>
+                                                <td>${iface.stats.mtu || 'N/A'}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Speed:</td>
+                                                <td>${iface.stats.speed || 'N/A'} Mbps</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Duplex:</td>
+                                                <td>${iface.stats.duplex || 'N/A'}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        row.appendChild(col);
+                    });
+                    
+                    container.appendChild(row);
+                })
+                .catch(error => {
+                    showError('network-interfaces', error);
+                });
+        }
+        
+        // Fetch network traffic
+        function fetchNetworkTraffic() {
+            fetch('/api/monitoring/network/traffic')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showError('network-traffic-table', data.error);
+                        return;
+                    }
+                    
+                    const tableBody = document.getElementById('network-traffic-table');
+                    tableBody.innerHTML = '';
+                    
+                    if (!data.interfaces || Object.keys(data.interfaces).length === 0) {
+                        showNoData('network-traffic-table', 'No network traffic information available');
+                        return;
+                    }
+                    
+                    // Add a row for each interface
+                    Object.keys(data.interfaces).forEach(name => {
+                        const traffic = data.interfaces[name];
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${name}</td>
+                            <td>${traffic.formatted.bytes_sent}</td>
+                            <td>${traffic.formatted.bytes_recv}</td>
+                            <td>${traffic.packets_sent}</td>
+                            <td>${traffic.packets_recv}</td>
+                            <td>${traffic.errin}/${traffic.errout}</td>
+                            <td>${traffic.dropin}/${traffic.dropout}</td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                    
+                    // Add a total row
+                    if (data.total) {
+                        const tr = document.createElement('tr');
+                        tr.className = 'table-active';
+                        tr.innerHTML = `
+                            <td><strong>Total</strong></td>
+                            <td><strong>${data.total.formatted.bytes_sent}</strong></td>
+                            <td><strong>${data.total.formatted.bytes_recv}</strong></td>
+                            <td><strong>${data.total.packets_sent}</strong></td>
+                            <td><strong>${data.total.packets_recv}</strong></td>
+                            <td><strong>${data.total.errin}/${data.total.errout}</strong></td>
+                            <td><strong>${data.total.dropin}/${data.total.dropout}</strong></td>
+                        `;
+                        tableBody.appendChild(tr);
+                    }
+                })
+                .catch(error => {
+                    showError('network-traffic-table', error);
+                });
+        }
+        
+        // Fetch network connections
+        function fetchNetworkConnections() {
+            fetch('/api/monitoring/network/connections')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showError('connections-table', data.error);
+                        return;
+                    }
+                    
+                    const tableBody = document.getElementById('connections-table');
+                    tableBody.innerHTML = '';
+                    
+                    if (!data.connections || data.connections.length === 0) {
+                        showNoData('connections-table', 'No network connections found');
+                        return;
+                    }
+                    
+                    // Add a row for each connection
+                    data.connections.forEach(conn => {
+                        const tr = document.createElement('tr');
+                        
+                        // Determine status color
+                        let statusClass = '';
+                        if (conn.status === 'ESTABLISHED') {
+                            statusClass = 'status-good';
+                        } else if (conn.status === 'LISTEN') {
+                            statusClass = 'status-warning';
+                        } else if (conn.status === 'CLOSE_WAIT' || conn.status === 'TIME_WAIT') {
+                            statusClass = 'text-muted';
+                        }
+                        
+                        tr.innerHTML = `
+                            <td>${conn.process || 'Unknown'}</td>
+                            <td>${conn.pid || 'N/A'}</td>
+                            <td>${conn.type || 'N/A'}</td>
+                            <td>${conn.laddr || 'N/A'}</td>
+                            <td>${conn.raddr || 'None'}</td>
+                            <td><span class="${statusClass}">${conn.status || 'N/A'}</span></td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                })
+                .catch(error => {
+                    showError('connections-table', error);
+                });
+        }
+        
+        // Fetch application information
+        function fetchAppInfo() {
+            // Placeholder for application info - can be implemented with custom endpoints
+            document.getElementById('app-info-table').innerHTML = `
+                <tr>
+                    <td><strong>Application:</strong></td>
+                    <td>Flask Monitoring Dashboard</td>
+                </tr>
+                <tr>
+                    <td><strong>Environment:</strong></td>
+                    <td>Development</td>
+                </tr>
+                <tr>
+                    <td><strong>Flask Version:</strong></td>
+                    <td>2.0+</td>
+                </tr>
+                <tr>
+                    <td><strong>Started:</strong></td>
+                    <td>${new Date().toLocaleString()}</td>
+                </tr>
+                <tr>
+                    <td><strong>Monitoring Status:</strong></td>
+                    <td><span class="status-good">Active</span></td>
+                </tr>
+            `;
+            
+            // Placeholder for user statistics
+            document.getElementById('user-stats').innerHTML = `
+                <div class="alert alert-info">
+                    User statistics monitoring requires application-specific implementation.
+                </div>
+            `;
+        }
+        
+        // Fetch routes
+        function fetchRoutes() {
+            fetch('/api/monitoring/application/routes')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showError('routes-table', data.error);
+                        return;
+                    }
+                    
+                    const tableBody = document.getElementById('routes-table');
+                    tableBody.innerHTML = '';
+                    
+                    if (!data.routes || data.routes.length === 0) {
+                        showNoData('routes-table', 'No routes found');
+                        return;
+                    }
+                    
+                    // Add a row for each route
+                    data.routes.forEach(route => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${route.path}</td>
+                            <td>${route.endpoint}</td>
+                            <td>${route.methods.join(', ')}</td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                })
+                .catch(error => {
+                    showError('routes-table', error);
+                });
+        }
+        
+        // Fetch request statistics
+        function fetchRequestStats() {
+            // Placeholder for request statistics
+            document.getElementById('request-stats').innerHTML = `
+                <div class="alert alert-info">
+                    Request statistics monitoring requires application-specific implementation.
+                </div>
+            `;
+        }
+        
+        // Fetch error logs
+        function fetchErrorLogs(page = 1, search = '') {
+            // Placeholder for error logs
+            document.getElementById('error-logs-table').innerHTML = `
+                <tr>
+                    <td colspan="3" class="text-center">
+                        <div class="alert alert-info mb-0">
+                            Error log monitoring requires application-specific implementation.
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
+            // Update pagination options
+            const pageSelect = document.getElementById('errorLogPage');
+            pageSelect.innerHTML = '<option value="1">Page 1</option>';
+        }
+        
+        // Fetch access logs
+        function fetchAccessLogs(page = 1, search = '') {
+            // Placeholder for access logs
+            document.getElementById('access-logs-table').innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center">
+                        <div class="alert alert-info mb-0">
+                            Access log monitoring requires application-specific implementation.
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
+            // Update pagination options
+            const pageSelect = document.getElementById('accessLogPage');
+            pageSelect.innerHTML = '<option value="1">Page 1</option>';
+        }
+        
+        // Show error message in a table
+        function showError(elementId, error) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            if (element.tagName === 'TBODY') {
+                element.innerHTML = `
+                    <tr class="table-danger">
+                        <td colspan="20" class="text-center">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> 
+                            Error: ${error}
+                        </td>
+                    </tr>
+                `;
+            } else {
+                element.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> 
+                        Error: ${error}
+                    </div>
+                `;
+            }
+        }
+        
+        // Show "no data" message
+        function showNoData(elementId, message) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            if (element.tagName === 'TBODY') {
+                element.innerHTML = `
+                    <tr class="no-data">
+                        <td colspan="20" class="text-center text-muted">
+                            <i class="bi bi-info-circle me-2"></i> 
+                            ${message}
+                        </td>
+                    </tr>
+                `;
+            } else {
+                element.innerHTML = `
+                    <div class="alert alert-secondary">
+                        <i class="bi bi-info-circle me-2"></i> 
+                        ${message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Format bytes to human-readable string (helper function)
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+            
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+        
+        // Format time duration to human-readable string (helper function)
+        function formatDuration(seconds) {
+            if (seconds < 60) {
+                return `${seconds} sec`;
+            } else if (seconds < 3600) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${minutes} min ${remainingSeconds} sec`;
+            } else if (seconds < 86400) {
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                return `${hours} hr ${minutes} min`;
+            } else {
+                const days = Math.floor(seconds / 86400);
+                const hours = Math.floor((seconds % 86400) / 3600);
+                return `${days} days ${hours} hr`;
+            }
+        }
+    </script>
+</body>
+</html>

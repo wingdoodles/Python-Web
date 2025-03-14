@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Tools - PyITToolbox</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .footer {
+            margin-top: 50px;
+            padding: 20px 0;
+            background-color: #343a40;
+            color: white;
+        }
+        .tool-output {
+            background-color: #212529;
+            color: #fff;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Common Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-tools"></i> PyITToolbox
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="bi bi-house"></i> Home</a>
+                    </li>
+                    <!-- Dropdown for Tools -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-tools"></i> All Tools
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/network"><i class="bi bi-globe"></i> Network Tools</a></li>
+                            <li><a class="dropdown-item" href="/system"><i class="bi bi-cpu"></i> System Tools</a></li>
+                            <li><a class="dropdown-item" href="/security"><i class="bi bi-shield-lock"></i> Security Tools</a></li>
+                            <li><a class="dropdown-item" href="/text"><i class="bi bi-file-text"></i> Text Tools</a></li>
+                            <li><a class="dropdown-item" href="/web"><i class="bi bi-browser-chrome"></i> Web Tools</a></li>
+                            <li><a class="dropdown-item" href="/file"><i class="bi bi-file-earmark"></i> File Tools</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item active" href="/database"><i class="bi bi-database"></i> Database Tools</a></li>
+                            <li><a class="dropdown-item" href="/logs"><i class="bi bi-journal-text"></i> Log Analysis</a></li>
+                            <li><a class="dropdown-item" href="/convert"><i class="bi bi-arrow-left-right"></i> Conversion Tools</a></li>
+                            <li><a class="dropdown-item" href="/monitor"><i class="bi bi-graph-up"></i> Monitoring</a></li>
+                            <li><a class="dropdown-item" href="/dev"><i class="bi bi-code-square"></i> Development</a></li>
+                            <li><a class="dropdown-item" href="/infrastructure"><i class="bi bi-hdd-rack"></i> Infrastructure</a></li>
+                            <li><a class="dropdown-item" href="/backup"><i class="bi bi-cloud-arrow-up"></i> Backup & Recovery</a></li>
+                            <li><a class="dropdown-item" href="/collab"><i class="bi bi-people"></i> Collaboration</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row mb-4">
+            <div class="col">
+                <h1><i class="bi bi-database"></i> Database Tools</h1>
+                <p class="lead">Database connection testing, query formatting, and schema visualization</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Database Connection Tester -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="bi bi-link"></i> Database Connection Tester</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="dbConnectionForm">
+                            <div class="mb-3">
+                                <label for="dbType" class="form-label">Database Type</label>
+                                <select class="form-select" id="dbType">
+                                    <option value="mysql">MySQL</option>
+                                    <option value="postgresql">PostgreSQL</option>
+                                    <option value="sqlite">SQLite</option>
+                                    <option value="mongodb">MongoDB</option>
+                                    <option value="redis">Redis</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="dbHost" class="form-label">Host</label>
+                                <input type="text" class="form-control" id="dbHost" placeholder="localhost or IP address">
+                            </div>
+                            <div class="mb-3">
+                                <label for="dbPort" class="form-label">Port</label>
+                                <input type="number" class="form-control" id="dbPort" placeholder="Database port">
+                            </div>
+                            <div class="mb-3">
+                                <label for="dbName" class="form-label">Database Name</label>
+                                <input type="text" class="form-control" id="dbName" placeholder="Database name">
+                            </div>
+                            <div class="mb-3">
+                                <label for="dbUser" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="dbUser" placeholder="Username">
+                            </div>
+                            <div class="mb-3">
+                                <label for="dbPassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="dbPassword" placeholder="Password">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Test Connection</button>
+                        </form>
+                        
+                        <div class="loader" id="dbConnectionLoader"></div>
+                        
+                        <div id="dbConnectionOutput" style="display: none;" class="mt-4">
+                            <h6>Connection Result</h6>
+                            <div class="tool-output" id="connectionResult"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SQL Query Formatter -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="bi bi-code-square"></i> SQL Query Formatter</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="sqlFormatterForm">
+                            <div class="mb-3">
+                                <label for="sqlQuery" class="form-label">SQL Query</label>
+                                <textarea class="form-control" id="sqlQuery" rows="8" placeholder="Enter your SQL query here"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Formatting Options</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="uppercaseKeywords" checked>
+                                    <label class="form-check-label" for="uppercaseKeywords">Uppercase Keywords</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="indentQuery" checked>
+                                    <label class="form-check-label" for="indentQuery">Indent Query</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="alignClauses" checked>
+                                    <label class="form-check-label" for="alignClauses">Align Clauses</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Format Query</button>
+                        </form>
+                        
+                        <div class="loader" id="sqlFormatterLoader"></div>
+                        
+                        <div id="sqlFormatterOutput" style="display: none;" class="mt-4">
+                            <h6>Formatted SQL</h6>
+                            <div class="tool-output" id="formattedSql"></div>
+                            <div class="mt-2">
+                                <button class="btn btn-outline-primary" id="copySqlResult">
+                                    <i class="bi bi-clipboard"></i> Copy SQL
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Database Schema Visualizer -->
+            <div class="col-md-12 mt-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="bi bi-diagram-3"></i> Database Schema Visualizer</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="schemaVisualizerForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="schemaType" class="form-label">Input Type</label>
+                                        <select class="form-select" id="schemaType">
+                                            <option value="sql">SQL Create Statements</option>
+                                            <option value="json">JSON Schema</option>
+                                            <option value="connection">Database Connection</option>
+                                        </select>
+                                    </div>
+                                    <div id="schemaConnectionFields" style="display: none;">
+                                        <!-- Same connection fields as in the connection tester -->
+                                        <div class="mb-3">
+                                            <label for="schemaDbType" class="form-label">Database Type
+                                                                                    </label>
+                                        <select class="form-select" id="schemaDbType">
+                                            <option value="mysql">MySQL</option>
+                                            <option value="postgresql">PostgreSQL</option>
+                                            <option value="sqlite">SQLite</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="schemaDbHost" class="form-label">Host</label>
+                                        <input type="text" class="form-control" id="schemaDbHost" placeholder="localhost or IP address">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="schemaDbPort" class="form-label">Port</label>
+                                        <input type="number" class="form-control" id="schemaDbPort" placeholder="Database port">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="schemaDbName" class="form-label">Database Name</label>
+                                        <input type="text" class="form-control" id="schemaDbName" placeholder="Database name">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="schemaDbUser" class="form-label">Username</label>
+                                        <input type="text" class="form-control" id="schemaDbUser" placeholder="Username">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="schemaDbPassword" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="schemaDbPassword" placeholder="Password">
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div id="schemaTextFields">
+                                        <div class="mb-3">
+                                            <label for="schemaInput" class="form-label">Schema Input</label>
+                                            <textarea class="form-control" id="schemaInput" rows="12" placeholder="Enter SQL CREATE statements or JSON schema"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="outputFormat" class="form-label">Output Format</label>
+                                <select class="form-select" id="outputFormat">
+                                    <option value="erd">Entity Relationship Diagram</option>
+                                    <option value="table">Table Structure</option>
+                                    <option value="json">JSON Representation</option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Visualize Schema</button>
+                        </form>
+                        
+                        <div class="loader" id="schemaVisualizerLoader"></div>
+                        
+                        <div id="schemaVisualizerOutput" style="display: none;" class="mt-4">
+                            <h6>Schema Visualization</h6>
+                            <div id="schemaResult" class="p-3 border rounded"></div>
+                            <div class="mt-2">
+                                <button class="btn btn-outline-primary" id="downloadSchema">
+                                    <i class="bi bi-download"></i> Download
+                                </button>
+                                <button class="btn btn-outline-primary ms-2" id="copySchema">
+                                    <i class="bi bi-clipboard"></i> Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container text-center">
+            <p>PyITToolbox - Database Tools</p>
+            <p><small>© 2023 - Made with <i class="bi bi-heart-fill text-danger"></i> for IT Professionals</small></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Database Connection Tester
+        document.getElementById('dbConnectionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const dbType = document.getElementById('dbType').value;
+            const dbHost = document.getElementById('dbHost').value;
+            const dbPort = document.getElementById('dbPort').value;
+            const dbName = document.getElementById('dbName').value;
+            const dbUser = document.getElementById('dbUser').value;
+            const dbPassword = document.getElementById('dbPassword').value;
+            
+            // Show loader, hide output
+            document.getElementById('dbConnectionOutput').style.display = 'none';
+            document.getElementById('dbConnectionLoader').style.display = 'block';
+            
+            fetch('/api/test_database_connection', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    type: dbType,
+                    host: dbHost,
+                    port: dbPort,
+                    database: dbName,
+                    username: dbUser,
+                    password: dbPassword
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('dbConnectionLoader').style.display = 'none';
+                document.getElementById('dbConnectionOutput').style.display = 'block';
+                
+                if (data.error) {
+                    document.getElementById('connectionResult').innerHTML = `<span class="text-danger">Error: ${data.error}</span>`;
+                } else {
+                    document.getElementById('connectionResult').innerHTML = `<span class="text-success">Success! ${data.message}</span>`;
+                    if (data.details) {
+                        document.getElementById('connectionResult').innerHTML += '<hr>' + data.details;
+                    }
+                }
+            })
+            .catch(error => {
+                document.getElementById('dbConnectionLoader').style.display = 'none';
+                document.getElementById('connectionResult').innerHTML = `<span class="text-danger">Error: ${error.message}</span>`;
+                document.getElementById('dbConnectionOutput').style.display = 'block';
+            });
+        });
+        
+        // SQL Query Formatter
+        document.getElementById('sqlFormatterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const sqlQuery = document.getElementById('sqlQuery').value;
+            const uppercaseKeywords = document.getElementById('uppercaseKeywords').checked;
+            const indentQuery = document.getElementById('indentQuery').checked;
+            const alignClauses = document.getElementById('alignClauses').checked;
+            
+            if (!sqlQuery.trim()) {
+                alert('Please enter an SQL query to format');
+                return;
+            }
+            
+            document.getElementById('sqlFormatterOutput').style.display = 'none';
+            document.getElementById('sqlFormatterLoader').style.display = 'block';
+            
+            fetch('/api/format_sql', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sql: sqlQuery,
+                    uppercase_keywords: uppercaseKeywords,
+                    indent_query: indentQuery,
+                    align_clauses: alignClauses
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('sqlFormatterLoader').style.display = 'none';
+                document.getElementById('sqlFormatterOutput').style.display = 'block';
+                
+                if (data.error) {
+                    document.getElementById('formattedSql').innerHTML = `<span class="text-danger">Error: ${data.error}</span>`;
+                } else {
+                    document.getElementById('formattedSql').textContent = data.formatted_sql;
+                }
+            })
+            .catch(error => {
+                document.getElementById('sqlFormatterLoader').style.display = 'none';
+                document.getElementById('formattedSql').innerHTML = `<span class="text-danger">Error: ${error.message}</span>`;
+                document.getElementById('sqlFormatterOutput').style.display = 'block';
+            });
+        });
+        
+        // Copy SQL button
+        document.getElementById('copySqlResult').addEventListener('click', function() {
+            const sqlResult = document.getElementById('formattedSql').textContent;
+            navigator.clipboard.writeText(sqlResult)
+                .then(() => {
+                    this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="bi bi-clipboard"></i> Copy SQL';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy text: ', err);
+                });
+        });
+        
+        // Schema Visualizer
+        document.getElementById('schemaType').addEventListener('change', function() {
+            const connectionFields = document.getElementById('schemaConnectionFields');
+            const textFields = document.getElementById('schemaTextFields');
+            
+            if (this.value === 'connection') {
+                connectionFields.style.display = 'block';
+                textFields.style.display = 'none';
+            } else {
+                connectionFields.style.display = 'none';
+                textFields.style.display = 'block';
+            }
+        });
+        
+        document.getElementById('schemaVisualizerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const schemaType = document.getElementById('schemaType').value;
+            const outputFormat = document.getElementById('outputFormat').value;
+            
+            let requestData = {
+                schema_type: schemaType,
+                output_format: outputFormat
+            };
+            
+            if (schemaType === 'connection') {
+                // Get database connection details
+                requestData.connection = {
+                    type: document.getElementById('schemaDbType').value,
+                    host: document.getElementById('schemaDbHost').value,
+                    port: document.getElementById('schemaDbPort').value,
+                    database: document.getElementById('schemaDbName').value,
+                    username: document.getElementById('schemaDbUser').value,
+                    password: document.getElementById('schemaDbPassword').value
+                };
+            } else {
+                // Get schema input from textarea
+                requestData.schema_input = document.getElementById('schemaInput').value;
+            }
+            
+            document.getElementById('schemaVisualizerOutput').style.display = 'none';
+            document.getElementById('schemaVisualizerLoader').style.display = 'block';
+            
+            fetch('/api/visualize_schema', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('schemaVisualizerLoader').style.display = 'none';
+                document.getElementById('schemaVisualizerOutput').style.display = 'block';
+                
+                if (data.error) {
+                    document.getElementById('schemaResult').innerHTML = `<span class="text-danger">Error: ${data.error}</span>`;
+                } else {
+                    if (outputFormat === 'erd') {
+                        // Display SVG diagram
+                        document.getElementById('schemaResult').innerHTML = data.visualization;
+                    } else if (outputFormat === 'table') {
+                        // Display HTML table
+                        document.getElementById('schemaResult').innerHTML = data.visualization;
+                    } else {
+                        // Display JSON representation in a pre tag
+                        document.getElementById('schemaResult').innerHTML = `<pre>${JSON.stringify(data.schema, null, 2)}</pre>`;
+                    }
+                }
+            })
+            .catch(error => {
+                document.getElementById('schemaVisualizerLoader').style.display = 'none';
+                document.getElementById('schemaResult').innerHTML = `<span class="text-danger">Error: ${error.message}</span>`;
+                document.getElementById('schemaVisualizerOutput').style.display = 'block';
+            });
+        });
+        
+        // Download Schema button
+        document.getElementById('downloadSchema').addEventListener('click', function() {
+            const outputFormat = document.getElementById('outputFormat').value;
+            const schemaResult = document.getElementById('schemaResult');
+            
+            let fileContent, fileName, fileType;
+            
+            if (outputFormat === 'erd') {
+                // SVG content
+                fileContent = schemaResult.innerHTML;
+                fileName = 'database_schema.svg';
+                fileType = 'image/svg+xml';
+            } else if (outputFormat === 'table') {
+                // HTML content
+                fileContent = schemaResult.innerHTML;
+                fileName = 'database_schema.html';
+                fileType = 'text/html';
+            } else {
+                // JSON content
+                fileContent = schemaResult.querySelector('pre').textContent;
+                fileName = 'database_schema.json';
+                fileType = 'application/json';
+            }
+            
+            const blob = new Blob([fileContent], { type: fileType });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+        
+        // Copy Schema button
+        document.getElementById('copySchema').addEventListener('click', function() {
+            const outputFormat = document.getElementById('outputFormat').value;
+            const schemaResult = document.getElementById('schemaResult');
+            
+            let contentToCopy;
+            
+            if (outputFormat === 'json') {
+                contentToCopy = schemaResult.querySelector('pre').textContent;
+            } else {
+                contentToCopy = schemaResult.innerHTML;
+            }
+            
+            navigator.clipboard.writeText(contentToCopy)
+                .then(() => {
+                    this.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="bi bi-clipboard"></i> Copy';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+        });
+    </script>
+</body>
+</html>

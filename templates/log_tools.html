@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Analysis Tools - PyITToolbox</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .footer {
+            margin-top: 50px;
+            padding: 20px 0;
+            background-color: #343a40;
+            color: white;
+        }
+        .tool-output {
+            background-color: #212529;
+            color: #fff;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .log-entry {
+            border-bottom: 1px solid #dee2e6;
+            padding: 8px 0;
+        }
+        .log-entry.error {
+            color: #dc3545;
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+        .log-entry.warning {
+            color: #ffc107;
+            background-color: rgba(255, 193, 7, 0.1);
+        }
+        .log-entry.info {
+            color: #17a2b8;
+            background-color: rgba(23, 162, 184, 0.1);
+        }
+        #logChart {
+            width: 100%;
+            height: 300px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Common Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-tools"></i> PyITToolbox
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="bi bi-house"></i> Home</a>
+                    </li>
+                    <!-- Dropdown for Tools -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-tools"></i> All Tools
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/network"><i class="bi bi-globe"></i> Network Tools</a></li>
+                            <li><a class="dropdown-item" href="/system"><i class="bi bi-cpu"></i> System Tools</a></li>
+                            <li><a class="dropdown-item" href="/security"><i class="bi bi-shield-lock"></i> Security Tools</a></li>
+                            <li><a class="dropdown-item" href="/text"><i class="bi bi-file-text"></i> Text Tools</a></li>
+                            <li><a class="dropdown-item" href="/web"><i class="bi bi-browser-chrome"></i> Web Tools</a></li>
+                            <li><a class="dropdown-item" href="/file"><i class="bi bi-file-earmark"></i> File Tools</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/database"><i class="bi bi-database"></i> Database Tools</a></li>
+                            <li><a class="dropdown-item active" href="/logs"><i class="bi bi-journal-text"></i> Log Analysis</a></li>
+                            <li><a class="dropdown-item" href="/convert"><i class="bi bi-arrow-left-right"></i> Conversion Tools</a></li>
+                            <li><a class="dropdown-item" href="/monitor"><i class="bi bi-graph-up"></i> Monitoring</a></li>
+                            <li><a class="dropdown-item" href="/dev"><i class="bi bi-code-square"></i> Development</a></li>
+                            <li><a class="dropdown-item" href="/infrastructure"><i class="bi bi-hdd-rack"></i> Infrastructure</a></li>
+                            <li><a class="dropdown-item" href="/backup"><i class="bi bi-cloud-arrow-up"></i> Backup & Recovery</a></li>
+                            <li><a class="dropdown-item" href="/collab"><i class="bi bi-people"></i> Collaboration</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row mb-4">
+            <div class="col">
+                <h1><i class="bi bi-journal-text"></i> Log Analysis Tools</h1>
+                <p class="lead">Parse, analyze, and visualize log files</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Log Parser -->
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="bi bi-file-text"></i> Log Parser & Analyzer</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="logParserForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="logInput" class="form-label">Log Content</label>
+                                        <textarea class="form-control" id="logInput" rows="10" placeholder="Paste your log content here or upload a log file"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="logFile" class="form-label">Or Upload Log File</label>
+                                        <input class="form-control" type="file" id="logFile">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="logFormat" class="form-label">Log Format</label>
+                                        <select class="form-select" id="logFormat">
+                                            <option value="auto">Auto-detect</option>
+                                            <option value="apache">Apache/Nginx Access Log</option>
+                                            <option value="syslog">Syslog</option>
+                                            <option value="windows">Windows Event Log</option>
+                                            <option value="json">JSON Log</option>
+                                            <option value="custom">Custom Format</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3" id="customFormatDiv" style="display: none;">
+                                        <label for="customFormat" class="form-label">Custom Format Pattern</label>
+                                        <input type="text" class="form-control" id="customFormat" placeholder="E.g., %{TIMESTAMP_ISO8601} %{LOGLEVEL} %{GREEDYDATA:message}">
+                                        <small class="form-text text-muted">Use Grok pattern syntax</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Analysis Options</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="extractTimestamp" checked>
+                                            <label class="form-check-label" for="extractTimestamp">Extract Timestamps</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="categorizeEntries" checked>
+                                            <label class="form-check-label" for="categorizeEntries">Categorize by Severity</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="identifyPatterns" checked>
+                                            <label class="form-check-label" for="identifyPatterns">Identify Common Patterns</label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="filterExpression" class="form-label">Filter Expression (optional)</label>
+                                        <input type="text" class="form-control" id="filterExpression" placeholder="E.g., error OR warning">
+                                        <small class="form-text text-muted">Filter logs using a search expression</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success">Parse & Analyze Log</button>
+                        </form>
+                        
+                        <div class="loader" id="logParserLoader"></div>
+                        
+                        <div id="logParserOutput" style="display: none;" class="mt-4">
+                            <ul class="nav nav-tabs" id="logTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="parsed-tab" data-bs-toggle="tab" data-bs-target="#parsed" type="button" role="tab" aria-controls="parsed" aria-selected="true">Parsed Entries</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab" aria-controls="stats" aria-selected="false">Statistics</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="patterns-tab" data-bs-toggle="tab" data-bs-target="#patterns" type="button" role="tab" aria-controls="patterns" aria-selected="false">Patterns</button>
+                                </li>
+                            </ul>
+                            <div class="tab-content p-3 border border-top-0 rounded-bottom" id="logTabContent">
+                                <div class="tab-pane fade show active" id="parsed" role="tabpanel" aria-labelledby="parsed-tab">
+                                    <div id="parsedEntries" class="tool-output"></div>
+                                </div>
+                                <div class="tab-pane fade" id="stats" role="tabpanel" aria-labelledby="stats-tab">
+                                    <div id="logStats"></div>
+                                    <canvas id="logChart"></canvas>
+                                </div>
+                                <div class="tab-pane fade" id="patterns" role="tabpanel" aria-labelledby="patterns-tab">
+                                    <div id="logPatterns"></div>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <button class="btn btn-outline-success" id="exportLogAnalysis">
+                                    <i class="bi bi-download"></i> Export Results
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Log Pattern Finder -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="bi bi-search"></i> Log Pattern Finder</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="patternFinderForm">
+                            <div class="mb-3">
+                                <label for="patternLogInput" class="form-label">Log Content</label>
+                                <textarea class="form-control" id="patternLogInput" rows="8" placeholder="Paste your log content here"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="patternType" class="form-label">Pattern Type</label>
+                                <select class="form-select" id="patternType">
+                                    <option value="errors">Error Messages</option>
+                                    <option value="warnings">Warning Messages</option>
+                                    <option value="ip">IP Addresses</option>
+                                    <option value="email">Email Addresses</option>
+                                    <option value="timestamp">Timestamps</option>
+                                    <option value="custom">Custom Regex</option>
+                                </select>
+                            </div>
+                            <div class="mb-3" id="customPatternDiv" style="display: none;">
+                                <label for="customPattern" class="form-label">Custom Regex Pattern</label>
+                                <input type="text" class="form-control" id="customPattern" placeholder="E.g., \b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b">
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="caseSensitive">
+                                    <label class="form-check-label" for="caseSensitive">Case Sensitive</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success">Find Patterns</button>
+                        </form>
+                        
+                        <div class="loader" id="patternFinderLoader"></div>
+                        
+                        <div id="patternFinderOutput" style="display: none;" class="mt-4">
+                            <h6>Found Patterns <span id="patternCount" class="badge bg-success">0</span></h6>
+                            <div class="tool-output" id="foundPatterns"></div>
+                            <div class="mt-2">
+                                <button class="btn btn-outline-success" id="exportPatterns">
+                                    <i class="bi bi-download"></i> Export Patterns
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Log Visualizer -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="bi bi-bar-chart"></i> Log Visualizer</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="logVisualizerForm">
+                            <div class="mb-3">
+                                <label for="vizLogInput" class="form-label">Log Content</label>
+                                <textarea class="form-control" id="vizLogInput" rows="8" placeholder="Paste your log content here"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="vizType" class="form-label">Visualization Type</label>
+                                <select class="form-select" id="vizType">
+                                    <option value="timeseries">Time Series</option>
+                                    <option value="severity">Severity Distribution</option>
+                                    <option value="source">Source Distribution</option>
+                                    <option value="heatmap">Temporal Heatmap</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="timeFrame" class="form-label">Time Frame</label>
+                                <select class="form-select" id="timeFrame">
+                                    <option value="all">All Data</option>
+                                    <option value="hour">Last Hour</option>
+                                    <option value="day">Last Day</option>
+                                    <option value="week">Last Week</option>
+                                    <option value="month">Last Month</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success">Generate Visualization</button>
+                        </form>
+                        
+                        <div class="loader" id="logVisualizerLoader"></div>
+                        
+                        <div id="logVisualizerOutput" style="display: none;" class="mt-4">
+                            <div id="vizContainer">
+                                <canvas id="logVisualizationChart"></canvas>
+                            </div>
+                            <div class="mt-2">
+                                <button class="btn btn-outline-success" id="downloadVisualization">
+                                    <i class="bi bi-download"></i> Download Image
+                                </button>
+                                <button class="btn btn-outline-success ms-2" id="downloadVizData">
+                                    <i class="bi bi-file-earmark-spreadsheet"></i> Download Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Real-time Log Monitor -->
+            <div class="col-md-12 mt-4">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="bi bi-clock-history"></i> Real-time Log Monitor</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="logMonitorForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="logFilePath" class="form-label">Log File Path</label>
+                                        <input type="text" class="form-control" id="logFilePath" placeholder="/var/log/syslog, C:\Windows\System32\Logs\*.log, etc.">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="refreshRate" class="form-label">Refresh Rate (seconds)</label>
+                                        <input type="number" class="form-control" id="refreshRate" min="1" value="5">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="monitorLogFormat" class="form-label">Log Format</label>
+                                        <select class="form-select" id="monitorLogFormat">
+                                            <option value="auto">Auto-detect</option>
+                                            <option value="apache">Apache/Nginx Access Log</option>
+                                            <option value="syslog">Syslog</option>
+                                            <option value="windows">Windows Event Log</option>
+                                            <option value="json">JSON Log</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="alertKeywords" class="form-label">Alert Keywords (comma separated)</label>
+                                        <input type="text" class="form-control" id="alertKeywords" placeholder="error, critical, exception, failure">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn btn-success" id="startMonitoring">Start Monitoring</button>
+                                <button type="button" class="btn btn-outline-danger" id="stopMonitoring" disabled>Stop Monitoring</button>
+                            </div>
+                        </form>
+                        
+                        <div id="logMonitorOutput" style="display: none;" class="mt-4">
+                            <div class="d-flex justify-content-between mb-2">
+                                <h6>Log Entries <span id="entryCount" class="badge bg-secondary">0</span></h6>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-secondary" id="clearLogEntries">Clear</button>
+                                </div>
+                            </div>
+                            <div class="tool-output" id="monitorEntries" style="max-height: 300px;"></div>
+                            <div class="mt-3">
+                                <h6>Statistics</h6>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="card bg-light">
+                                            <div class="card-body py-2">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Entries/minute:</span>
+                                                    <span id="entriesPerMinute">0</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card bg-light">
+                                            <div class="card-body py-2">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Alerts triggered:</span>
+                                                    <span id="alertsTriggered">0</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card bg-light">
+                                            <div class="card-body py-2">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Monitoring time:</span>
+                                                    <span id="monitoringTime">00:00:00</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container text-center">
+            <p>PyITToolbox - Log Analysis Tools</p>
+            <p><small>© 2023 - Made with <i class="bi bi-heart-fill text-danger"></i> for IT Professionals</small></p>
+        </div>
+    </footer>
+
+    <!-- Include Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Log Format selection handler
+        document.getElementById('logFormat').addEventListener('change', function() {
+            const customFormatDiv = document.getElementById('customFormatDiv');
+            if (this.value === 'custom') {
+                customFormatDiv.style.display = 'block';
+            } else {
+                customFormatDiv.style.display = 'none';
+            }
+        });
+
+        // Pattern Type selection handler
+        document.getElementById('patternType').addEventListener('change', function() {
+            const customPatternDiv = document.getElementById('customPatternDiv');
+            if (this.value === 'custom') {
+                customPatternDiv.style.display = 'block';
+            } else {
+                customPatternDiv.style.display = 'none';
+            }
+        });
+
+        // Log File input handler
+        document.getElementById('logFile').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('logInput').value = event.target.result;
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // Log Parser Form Submission
+        document.getElementById('logParserForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const logInput = document.getElementById('logInput').value;
+            const logFormat = document.getElementById('logFormat').value;
+            const customFormat = document.getElementById('customFormat').value;
+            const extractTimestamp = document.getElementById('extractTimestamp').checked;
+            const categorizeEntries = document.getElementById('categorizeEntries').checked;
+            const identifyPatterns = document.getElementById('identifyPatterns').checked;
+            const filterExpression = document.getElementById('filterExpression').value;
+            
+            if (!logInput.trim()) {
+                alert('Please enter log content or upload a log file');
+                return;
+            }
+            
+            document.getElementById('logParserOutput').style.display = 'none';
+            document.getElementById('logParserLoader').style.display = 'block';
+            
+            const requestData = {
+                log_content: logInput,
+                format: logFormat,
+                extract_timestamp: extractTimestamp,
+                categorize_entries: categorizeEntries,
+                identify_patterns: identifyPatterns,
+                filter: filterExpression.trim() || null
+            };
+            
+            if (logFormat === 'custom') {
+                requestData.custom_format = customFormat;
+            }
+            
+            fetch('/api/parse_log', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('logParserLoader').style.display = 'none';
+                document.getElementById('logParserOutput').style.display = 'block';
+                
+                if (data.error) {
+                    document.getElementById('parsedEntries').innerHTML = `<span class="text-danger">Error: ${data.error}</span>`;
+                } else {
+                    // Populate Parsed Entries tab
+                    let entriesHtml = '';
+                    data.entries.forEach(entry => {
+                        let entryClass = '';
+                        if (entry.level) {
+                            if (entry.level.toLowerCase().includes('error')) {
+                                entryClass = 'error';
+                            } else if (entry.level.toLowerCase().includes('warn')) {
+                                entryClass = 'warning';
+                            } else if (entry.level.toLowerCase().includes('info')) {
+                                entryClass = 'info';
+                            }
+                        }
+                        
+                        entriesHtml += `<div class="log-entry ${entryClass}">`;
+                        if (entry.timestamp) {
+                            entriesHtml += `<strong>[${entry.timestamp}]</strong> `;
+                        }
+                        if (entry.level) {
+                            entriesHtml += `<span class="badge bg-${entryClass === 'error' ? 'danger' : (entryClass === 'warning' ? 'warning' : 'info')}">${entry.level}</span> `;
+                        }
+                        entriesHtml += `${entry.message}</div>`;
+                    });
+                    document.getElementById('parsedEntries').innerHTML = entriesHtml;
+                    
+                    // Populate Statistics tab
+                    let statsHtml = '<div class="row">';
+                    
+                    // Total entries
+                    statsHtml += `
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-white bg-primary">
+                            <div class="card-body text-center">
+                                <h3>${data.stats.total_entries}</h3>
+                                <p class="mb-0">Total Entries</p>
+                            </div>
+                        </div>
+                    </div>`;
+                    
+                    // Error count
+                    statsHtml += `
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-white bg-danger">
+                            <div class="card-body text-center">
+                                <h3>${data.stats.error_count}</h3>
+                                <p class="mb-0">Errors</p>
+                            </div>
+                        </div>
+                    </div>`;
+                    
+                    // Warning count
+                    statsHtml += `
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-white bg-warning">
+                            <div class="card-body text-center">
+                                <h3>${data.stats.warning_count}</h3>
+                                <p class="mb-0">Warnings</p>
+                            </div>
+                        </div>
+                    </div>`;
+                    
+                    // Info count
+                    statsHtml += `
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-white bg-info">
+                            <div class="card-body text-center">
+                                <h3>${data.stats.info_count}</h3>
+                                <p class="mb-0">Info Messages</p>
+                            </div>
+                        </div>
+                    </div>`;
+                    
+                    // Time range
+                    if (data.stats.time_range) {
+                        statsHtml += `
+                                                <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Time Range</h5>
+                                    <p class="mb-0">First entry: ${data.stats.time_range.first}</p>
+                                    <p class="mb-0">Last entry: ${data.stats.time_range.last}</p>
+                                    <p class="mb-0">Duration: ${data.stats.time_range.duration}</p>
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    // Top sources if available
+                    if (data.stats.top_sources) {
+                        statsHtml += `
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Top Sources</h5>
+                                    <ul class="list-group">`;
+                        
+                        Object.entries(data.stats.top_sources).forEach(([source, count]) => {
+                            statsHtml += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                                ${source}
+                                <span class="badge bg-primary rounded-pill">${count}</span>
+                            </li>`;
+                        });
+                        
+                        statsHtml += `</ul>
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    statsHtml += '</div>';
+                    document.getElementById('logStats').innerHTML = statsHtml;
+                    
+                    // Create chart
+                    if (data.stats.time_distribution) {
+                        const ctx = document.getElementById('logChart').getContext('2d');
+                        const timeLabels = Object.keys(data.stats.time_distribution);
+                        const errorData = [];
+                        const warningData = [];
+                        const infoData = [];
+                        
+                        timeLabels.forEach(label => {
+                            errorData.push(data.stats.time_distribution[label].error || 0);
+                            warningData.push(data.stats.time_distribution[label].warning || 0);
+                            infoData.push(data.stats.time_distribution[label].info || 0);
+                        });
+                        
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: timeLabels,
+                                datasets: [
+                                    {
+                                        label: 'Errors',
+                                        data: errorData,
+                                        backgroundColor: 'rgba(220, 53, 69, 0.2)',
+                                        borderColor: 'rgba(220, 53, 69, 1)',
+                                        borderWidth: 1,
+                                        tension: 0.1
+                                    },
+                                    {
+                                        label: 'Warnings',
+                                        data: warningData,
+                                        backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                                        borderColor: 'rgba(255, 193, 7, 1)',
+                                        borderWidth: 1,
+                                        tension: 0.1
+                                    },
+                                    {
+                                        label: 'Info',
+                                        data: infoData,
+                                        backgroundColor: 'rgba(23, 162, 184, 0.2)',
+                                        borderColor: 'rgba(23, 162, 184, 1)',
+                                        borderWidth: 1,
+                                        tension: 0.1
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'Log Entries Over Time'
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Time'
+                                        }
+                                    },
+                                    y: {
+                                        beginAtZero: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Number of Entries'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Populate Patterns tab
+                    if (data.patterns && data.patterns.length > 0) {
+                        let patternsHtml = '<ul class="list-group">';
+                        data.patterns.forEach(pattern => {
+                            patternsHtml += `
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6>${pattern.pattern}</h6>
+                                        <small class="text-muted">Occurrences: ${pattern.occurrences}</small>
+                                    </div>
+                                    <span class="badge bg-${pattern.severity === 'error' ? 'danger' : (pattern.severity === 'warning' ? 'warning' : 'info')}">${pattern.severity}</span>
+                                </div>
+                                <div class="mt-2">
+                                    <small>Example: ${pattern.example}</small>
+                                </div>
+                            </li>`;
+                        });
+                        patternsHtml += '</ul>';
+                        document.getElementById('logPatterns').innerHTML = patternsHtml;
+                    } else {
+                        document.getElementById('logPatterns').innerHTML = '<p>No significant patterns identified.</p>';
+                    }
+                }
+            })
+            .catch(error => {
+                document.getElementById('logParserLoader').style.display = 'none';
+                document.getElementById('parsedEntries').innerHTML = `<span class="text-danger">Error: ${error.message}</span>`;
+                document.getElementById('logParserOutput').style.display = 'block';
+            });
+        });
+        
+        // Export Log Analysis Results
+        document.getElementById('exportLogAnalysis').addEventListener('click', function() {
+            const activeTab = document.querySelector('#logTabs .nav-link.active').getAttribute('id');
+            let content, fileName, fileType;
+            
+            if (activeTab === 'parsed-tab') {
+                content = document.getElementById('parsedEntries').innerText;
+                fileName = 'parsed_log_entries.txt';
+                fileType = 'text/plain';
+            } else if (activeTab === 'stats-tab') {
+                content = document.getElementById('logStats').innerText;
+                fileName = 'log_statistics.txt';
+                fileType = 'text/plain';
+            } else if (activeTab === 'patterns-tab') {
+                content = document.getElementById('logPatterns').innerText;
+                fileName = 'log_patterns.txt';
+                fileType = 'text/plain';
+            }
+            
+            const blob = new Blob([content], { type: fileType });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+        
+        // Pattern Finder Form Submission
+        document.getElementById('patternFinderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const logInput = document.getElementById('patternLogInput').value;
+            const patternType = document.getElementById('patternType').value;
+            const customPattern = document.getElementById('customPattern').value;
+            const caseSensitive = document.getElementById('caseSensitive').checked;
+            
+            if (!logInput.trim()) {
+                alert('Please enter log content');
+                return;
+            }
+            
+            document.getElementById('patternFinderOutput').style.display = 'none';
+            document.getElementById('patternFinderLoader').style.display = 'block';
+            
+            const requestData = {
+                log_content: logInput,
+                pattern_type: patternType,
+                case_sensitive: caseSensitive
+            };
+            
+            if (patternType === 'custom') {
+                requestData.custom_pattern = customPattern;
+            }
+            
+            fetch('/api/find_patterns', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('patternFinderLoader').style.display = 'none';
+                document.getElementById('patternFinderOutput').style.display = 'block';
+                
+                if (data.error) {
+                    document.getElementById('foundPatterns').innerHTML = `<span class="text-danger">Error: ${data.error}</span>`;
+                    document.getElementById('patternCount').textContent = "0";
+                } else {
+                    document.getElementById('patternCount').textContent = data.patterns.length;
+                    
+                    if (data.patterns.length > 0) {
+                        let patternsHtml = '<ul class="list-group">';
+                        data.patterns.forEach((pattern, index) => {
+                            patternsHtml += `
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>${pattern}</span>
+                                    <span class="badge bg-secondary">${index + 1}</span>
+                                </div>
+                            </li>`;
+                        });
+                        patternsHtml += '</ul>';
+                        document.getElementById('foundPatterns').innerHTML = patternsHtml;
+                    } else {
+                        document.getElementById('foundPatterns').innerHTML = '<p>No patterns found.</p>';
+                    }
+                }
+            })
+            .catch(error => {
+                document.getElementById('patternFinderLoader').style.display = 'none';
+                document.getElementById('foundPatterns').innerHTML = `<span class="text-danger">Error: ${error.message}</span>`;
+                document.getElementById('patternFinderOutput').style.display = 'block';
+                document.getElementById('patternCount').textContent = "0";
+            });
+        });
+        
+        // Export Patterns
+        document.getElementById('exportPatterns').addEventListener('click', function() {
+            const content = document.getElementById('foundPatterns').innerText;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'log_patterns.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+        
+        // Log Visualizer Form Submission
+        document.getElementById('logVisualizerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const logInput = document.getElementById('vizLogInput').value;
+            const vizType = document.getElementById('vizType').value;
+            const timeFrame = document.getElementById('timeFrame').value;
+            
+            if (!logInput.trim()) {
+                alert('Please enter log content');
+                return;
+            }
+            
+            document.getElementById('logVisualizerOutput').style.display = 'none';
+            document.getElementById('logVisualizerLoader').style.display = 'block';
+            
+            fetch('/api/visualize_log', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    log_content: logInput,
+                    visualization_type: vizType,
+                    time_frame: timeFrame
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('logVisualizerLoader').style.display = 'none';
+                document.getElementById('logVisualizerOutput').style.display = 'block';
+                
+                if (data.error) {
+                    document.getElementById('vizContainer').innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                } else {
+                    // Clear previous chart if it exists
+                    document.getElementById('vizContainer').innerHTML = '<canvas id="logVisualizationChart"></canvas>';
+                    const ctx = document.getElementById('logVisualizationChart').getContext('2d');
+                    
+                    let chartConfig;
+                    if (vizType === 'timeseries') {
+                        chartConfig = {
+                            type: 'line',
+                            data: {
+                                labels: data.visualization.labels,
+                                datasets: data.visualization.datasets
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'Log Entries Over Time'
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Time'
+                                        }
+                                    },
+                                    y: {
+                                        beginAtZero: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Number of Entries'
+                                        }
+                                    }
+                                }
+                            }
+                        };
+                    } else if (vizType === 'severity') {
+                        chartConfig = {
+                            type: 'pie',
+                            data: {
+                                labels: data.visualization.labels,
+                                datasets: [{
+                                    data: data.visualization.data,
+                                    backgroundColor: data.visualization.colors
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'Log Severity Distribution'
+                                    },
+                                    legend: {
+                                        position: 'right'
+                                    }
+                                }
+                            }
+                        };
+                    } else if (vizType === 'source') {
+                        chartConfig = {
+                            type: 'bar',
+                            data: {
+                                labels: data.visualization.labels,
+                                datasets: [{
+                                    label: 'Log Entries per Source',
+                                    data: data.visualization.data,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'Log Source Distribution'
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Number of Entries'
+                                        }
+                                    }
+                                }
+                            }
+                        };
+                    } else if (vizType === 'heatmap') {
+                        // Set up data for the heatmap
+                        const hourLabels = Array.from({length: 24}, (_, i) => `${i}:00`);
+                        const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                        
+                        chartConfig = {
+                            type: 'matrix',
+                            data: {
+                                datasets: [{
+                                    label: 'Log Activity Heatmap',
+                                    data: data.visualization.heatmap_data,
+                                    backgroundColor: (ctx) => {
+                                        const value = ctx.dataset.data[ctx.dataIndex].v;
+                                        const alpha = Math.min(1, Math.max(0.1, value / data.visualization.max_value));
+                                        return `rgba(54, 162, 235, ${alpha})`;
+                                    },
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1,
+                                    width: ({ chart }) => (chart.chartArea || {}).width / 24 - 1,
+                                    height: ({ chart }) => (chart.chartArea || {}).height / 7 - 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'Log Activity by Day and Hour'
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            title: function(context) {
+                                                const d = context[0].dataset.data[context[0].dataIndex];
+                                                return `${dayLabels[d.y]}, ${hourLabels[d.x]}`;
+                                            },
+                                            label: function(context) {
+                                                const value = context.dataset.data[context.dataIndex].v;
+                                                return `${value} entries`;
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Hour of Day'
+                                        },
+                                        labels: hourLabels,
+                                        ticks: {
+                                            stepSize: 1
+                                        }
+                                    },
+                                    y: {
+                                        reverse: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Day of Week'
+                                        },
+                                        labels: dayLabels,
+                                        ticks: {
+                                            stepSize: 1
+                                        }
+                                    }
+                                }
+                            }
+                        };
+                    }
+                    
+                    new Chart(ctx, chartConfig);
+                }
+            })
+            .catch(error => {
+                document.getElementById('logVisualizerLoader').style.display = 'none';
+                document.getElementById('vizContainer').innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+                document.getElementById('logVisualizerOutput').style.display = 'block';
+            });
+        });
+        
+        // Download Visualization as Image
+        document.getElementById('downloadVisualization').addEventListener('click', function() {
+            const canvas = document.getElementById('logVisualizationChart');
+            const url = canvas.toDataURL('image/png');
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'log_visualization.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+        
+        // Download Visualization Data
+        document.getElementById('downloadVizData').addEventListener('click', function() {
+            const vizType = document.getElementById('vizType').value;
+            const chart = Chart.getChart('logVisualizationChart');
+            
+            if (!chart) return;
+            
+            let csvContent = 'data:text/csv;charset=utf-8,';
+            
+            if (vizType === 'timeseries') {
+                // Headers
+                let headers = ['Time'];
+                chart.data.datasets.forEach(dataset => {
+                    headers.push(dataset.label);
+                });
+                csvContent += headers.join(',') + '\n';
+                
+                // Data rows
+                chart.data.labels.forEach((label, i) => {
+                    let row = [label];
+                    chart.data.datasets.forEach(dataset => {
+                        row.push(dataset.data[i]);
+                    });
+                    csvContent += row.join(',') + '\n';
+                });
+            } else if (vizType === 'severity' || vizType === 'source') {
+                // Headers
+                csvContent += 'Category,Value\n';
+                
+                // Data rows
+                chart.data.labels.forEach((label, i) => {
+                    csvContent += `${label},${chart.data.datasets[0].data[i]}\n`;
+                });
+            } else if (vizType === 'heatmap') {
+                // Headers
+                csvContent += 'Day,Hour,Value\n';
+                
+                // Data rows
+                const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                chart.data.datasets[0].data.forEach(point => {
+                    const hour = point.x;
+                    const day = dayLabels[point.y];
+                    const value = point.v;
+                    csvContent += `${day},${hour}:00,${value}\n`;
+                });
+            }
+            
+            const encodedUri = encodeURI(csvContent);
+            const a = document.createElement('a');
+            a.href = encodedUri;
+            a.download = 'log_visualization_data.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+        
+        // Real-time Log Monitor
+        let monitoringInterval;
+        let monitoringStartTime;
+        let totalEntries = 0;
+        let alertsCount = 0;
+        let entriesLastMinute = 0;
+        
+        // Start Monitoring
+        document.getElementById('logMonitorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const logFilePath = document.getElementById('logFilePath').value;
+            const refreshRate = document.getElementById('refreshRate').value;
+            const logFormat = document.getElementById('monitorLogFormat').value;
+            const alertKeywords = document.getElementById('alertKeywords').value;
+            
+            if (!logFilePath.trim()) {
+                alert('Please enter a log file path');
+                return;
+            }
+            
+            // Reset counters
+            monitoringStartTime = new Date();
+            totalEntries = 0;
+            alertsCount = 0;
+            entriesLastMinute = 0;
+            
+            // Update UI elements
+            document.getElementById('entryCount').textContent = totalEntries;
+            document.getElementById('alertsTriggered').textContent = alertsCount;
+            document.getElementById('entriesPerMinute').textContent = entriesLastMinute;
+            document.getElementById('monitoringTime').textContent = '00:00:00';
+            document.getElementById('monitorEntries').innerHTML = '';
+            
+            // Show output area
+            document.getElementById('logMonitorOutput').style.display = 'block';
+            
+            // Toggle buttons
+            document.getElementById('startMonitoring').disabled = true;
+            document.getElementById('stopMonitoring').disabled = false;
+            
+            // Start timer to update monitoring time
+            const timerInterval = setInterval(function() {
+                const now = new Date();
+                const diff = new Date(now - monitoringStartTime);
+                const hours = String(diff.getUTCHours()).padStart(2, '0');
+                const minutes = String(diff.getUTCMinutes()).padStart(2, '0');
+                const seconds = String(diff.getUTCSeconds()).padStart(2, '0');
+                document.getElementById('monitoringTime').textContent = `${hours}:${minutes}:${seconds}`;
+            }, 1000);
+            
+            // Start monitoring
+            monitoringInterval = setInterval(function() {
+                fetchLogUpdates(logFilePath, logFormat, alertKeywords, refreshRate);
+            }, refreshRate * 1000);
+            
+            // Perform initial fetch
+            fetchLogUpdates(logFilePath, logFormat, alertKeywords, refreshRate);
+            
+            // Store timer interval so we can clear it later
+            document.getElementById('stopMonitoring').dataset.timerInterval = timerInterval;
+        });
+        
+        // Stop Monitoring
+        document.getElementById('stopMonitoring').addEventListener('click', function() {
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+                clearInterval(this.dataset.timerInterval);
+                monitoringInterval = null;
+                
+                // Toggle buttons
+                document.getElementById('startMonitoring').disabled = false;
+                document.getElementById('stopMonitoring').disabled = true;
+            }
+        });
+        
+        // Clear Log Entries
+        document.getElementById('clearLogEntries').addEventListener('click', function() {
+            document.getElementById('monitorEntries').innerHTML = '';
+            totalEntries = 0;
+            document.getElementById('entryCount').textContent = totalEntries;
+        });
+        
+        // Function to fetch log updates
+        function fetchLogUpdates(logFilePath, logFormat, alertKeywords, refreshRate) {
+            fetch('/api/monitor_log', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    log_file_path: logFilePath,
+                    format: logFormat,
+                    alert_keywords: alertKeywords.split(',').map(k => k.trim()).filter(k => k)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    appendLogEntry(`<span class="text-danger">Error: ${data.error}</span>`);
+                } else if (data.entries && data.entries.length > 0) {
+                    // Update counters
+                    totalEntries += data.entries.length;
+                    document.getElementById('entryCount').textContent = totalEntries;
+                    
+                    // Update entries per minute
+                    entriesLastMinute = Math.round(data.entries.length * (60 / refreshRate));
+                    document.getElementById('entriesPerMinute').textContent = entriesLastMinute;
+                    
+                    // Display new entries
+                    data.entries.forEach(entry => {
+                        let entryClass = '';
+                        let isAlert = false;
+                        
+                        if (entry.level) {
+                            if (entry.level.toLowerCase().includes('error')) {
+                                entryClass = 'text-danger';
+                                isAlert = true;
+                            } else if (entry.level.toLowerCase().includes('warn')) {
+                                entryClass = 'text-warning';
+                            } else if (entry.level.toLowerCase().includes('info')) {
+                                entryClass = 'text-info';
+                            }
+                        }
+                        
+                        // Check if entry contains any alert keywords
+                        const alertKwds = alertKeywords.split(',').map(k => k.trim()).filter(k => k);
+                        if (alertKwds.length > 0) {
+                            const entryText = JSON.stringify(entry).toLowerCase();
+                            if (alertKwds.some(keyword => entryText.includes(keyword.toLowerCase()))) {
+                                entryClass = 'text-danger';
+                                isAlert = true;
+                            }
+                        }
+                        
+                        if (isAlert) {
+                            alertsCount++;
+                            document.getElementById('alertsTriggered').textContent = alertsCount;
+                        }
+                        
+                        let entryHtml = `<div class="${entryClass}">`;
+                        if (entry.timestamp) {
+                            entryHtml += `<strong>[${entry.timestamp}]</strong> `;
+                        }
+                        if (entry.level) {
+                            entryHtml += `<span class="badge ${entryClass === 'text-danger' ? 'bg-danger' : (entryClass === 'text-warning' ? 'bg-warning' : 'bg-info')}">${entry.level}</span> `;
+                        }
+                        entryHtml += `${entry.message}</div>`;
+                        
+                        appendLogEntry(entryHtml);
+                    });
+                }
+            })
+            .catch(error => {
+                appendLogEntry(`<span class="text-danger">Error: ${error.message}</span>`);
+            });
+        }
+        
+        // Function to append entry to the log monitor
+        function appendLogEntry(entryHtml) {
+            const monitorEntries = document.getElementById('monitorEntries');
+            monitorEntries.innerHTML = entryHtml + monitorEntries.innerHTML;
+            
+            // Limit the number of entries shown to prevent browser slowdown
+            const maxEntries = 100;
+            const entries = monitorEntries.children;
+            if (entries.length > maxEntries) {
+                for (let i = maxEntries; i < entries.length; i++) {
+                    entries[i].remove();
+                }
+            }
+        }
+    </script>
+
+
+
