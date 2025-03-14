@@ -31,7 +31,7 @@ pip install -r requirements.txt
 
 # Copy static HTML file to public directory
 echo -e "${YELLOW}Copying static files to public directory...${NC}"
-cp templates/index.html
+cp templates/index.html public/index.html
 
 # If you have any CSS or JS files, copy them too
 if [ -d "static" ]; then
