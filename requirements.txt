@@ -1,0 +1,40 @@
+# Web Framework
+Flask==2.3.3
+Werkzeug==2.3.7
+
+# Database
+SQLAlchemy==2.0.20
+alembic==1.12.0
+
+# API and HTTP
+requests==2.31.0
+httpx==0.24.1
+
+# JSON handling
+pydantic==2.3.0
+
+# Security
+python-dotenv==1.0.0
+PyJWT==2.8.0
+bcrypt==4.0.1
+
+# CORS support
+Flask-Cors==4.0.0
+
+# Regex utilities
+regex==2023.8.8
+
+# Code highlighting and parsing
+pygments==2.16.1
+
+# Testing
+pytest==7.4.0
+pytest-cov==4.1.0
+
+# Development tools
+black==23.7.0
+flake8==6.1.0
+isort==5.12.0
+
+# Production server
+gunicorn==21.2.0
